@@ -6,7 +6,7 @@ Hazır node.js ile kendiniz ayarlayabildiğiniz twitch chat botu.
 |-|-|-|-|
 |!lolsummoner ByDextér | Hesap ismi |!tftsummoner ByDéxter|Hesap ismi|
 |!lolregion tr|Bölge|!tftregion tr|Bölge
-|!lolrank|SoloQ Rankı|!tftrank|TFT Rankı
+|!lolrank|SoloQ rankı|!tftrank|TFT rankı
 |!lollastmatch|Son eşleşme|!tftlastmatch|Son eşleşme
 |!winrate|SoloQ kazanma oranı|!tftavg|Sıralama ortalaması
 |!runes|Maç esnasında kullandığı rün
