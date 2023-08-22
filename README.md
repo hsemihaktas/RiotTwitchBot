@@ -4,7 +4,7 @@ Hazır node.js ile kendiniz ayarlayabildiğiniz twitch chat botu.
 ## Özellikleri:
 |League of Legends|Açıklama|Teamfight Tactics|Açıklama|
 |-|-|-|-|
-|!lolsummoner ByDextér | Hesap ismi |!tftsummoner ByDéxter|Hesap ismi|
+|!lolsummoner ByDextér|Hesap ismi|!tftsummoner ByDéxter|Hesap ismi|
 |!lolregion tr|Bölge|!tftregion tr|Bölge
 |!lolrank|SoloQ rankı|!tftrank|TFT rankı
 |!lollastmatch|Son eşleşme|!tftlastmatch|Son eşleşme
@@ -12,3 +12,5 @@ Hazır node.js ile kendiniz ayarlayabildiğiniz twitch chat botu.
 |!runes|Maç esnasında kullandığı rün
 |!matchup|Maçta oynayanların rankı
 |!avgrank|Maçın ortalama rankı
+|!mostplayed|En çok oynanan şampiyon
+|!streak|Maç yenilmezliği
