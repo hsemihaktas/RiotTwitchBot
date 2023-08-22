@@ -503,7 +503,7 @@ async function FLolavg(channel) {
       return;
     }
 
-    const ranks = { "UNRANKED": 0, "IRON IV": 1, "IRON III": 2, "IRON II": 3, "IRON I": 4, "BRONZE IV": 5, "BRONZE III": 6, "BRONZE II": 7, "BRONZE I": 8, "SILVER IV": 9, "SILVER III": 10, "SILVER II": 11, "SILVER I": 12, "GOLD IV": 13, "GOLD III": 14, "GOLD II": 15, "GOLD I": 16, "PLATINUM IV": 17, "PLATINUM III": 18, "PLATINUM II": 19, "PLATINUM I": 20, "EMERALD IV": 21, "EMERALD III": 22, "EMERALD II": 23, "EMERALD I": 24, "DIAMOND IV": 25, "DIAMOND III": 26, "DIAMOND II": 27, "DIAMOND I": 28, "MASTER": 29, "GRANDMASTER": 30, "CHALLENGER": 31 };
+    const ranks = { "UNRANKED": 0, "IRON IV": 1, "IRON III": 2, "IRON II": 3, "IRON I": 4, "BRONZE IV": 5, "BRONZE III": 6, "BRONZE II": 7, "BRONZE I": 8, "SILVER IV": 9, "SILVER III": 10, "SILVER II": 11, "SILVER I": 12, "GOLD IV": 13, "GOLD III": 14, "GOLD II": 15, "GOLD I": 16, "PLATINUM IV": 17, "PLATINUM III": 18, "PLATINUM II": 19, "PLATINUM I": 20, "EMERALD IV": 21, "EMERALD III": 22, "EMERALD II": 23, "EMERALD I": 24, "DIAMOND IV": 25, "DIAMOND III": 26, "DIAMOND II": 27, "DIAMOND I": 28, "MASTER I": 29, "GRANDMASTER I": 30, "CHALLENGER I": 31 };
     let totalRankValue = 0;
     let totalPlayers = 0;
 
@@ -524,13 +524,12 @@ async function FLolavg(channel) {
     }));
 
     let averageRankValue = Math.round(totalRankValue / totalPlayers);
-    if (averageRankValue > 31) averageRankValue = 31;
-    else if (averageRankValue < 0) averageRankValue = 0;
-
     let averageRankName = 'Bilinmeyen Rank';
-    for (const rank in ranks) if (ranks[rank] === averageRankValue) averageRankName = rank;
 
-    client.say(channel, `Rank Ortalaması: ${averageRankName}`);
+    for (const rank in ranks) if (ranks[rank] === averageRankValue) averageRankName = rank;
+    const regex = /(MASTER|GRANDMASTER|CHALLENGER)\sI$/;
+
+    client.say(channel, `Rank Ortalaması: ${averageRankName.replace(regex, "$1")}`);
   } catch (error) {
     client.say(channel, 'Eşleşme verileri alınamadı.');
     if (error.response) {
