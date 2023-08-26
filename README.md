@@ -16,13 +16,14 @@ Node.js axios kütüphanesi ile riot api kullanılarak twitch izleyicilerin oyun
 |!lolsummoner Name|İstatiklerin çekileceği hesap ismi
 |!lolregion TR|İstatiklerin çekileceği bölge
 |!lolrank|Sihirdarın ligini gösterir
-|!lollastmatch/!lastgame|Sihirdarın son maç istatistiğini gösterir
+|!lollastmatch / !lollastgame|Sihirdarın son maç istatistiğini gösterir
 |!runes|Sihirdarın rünleri gösterir
 |!matchup|Sihirdarların liglerini gösterir
-|!winrate/!wr|Sihirdarın SoloQ kazanma oranını gösterir
-|!avgrank/!elo|Sihirdarların lig ortalamasını gösterir
+|!winrate / !wr|Sihirdarın SoloQ kazanma oranını gösterir
+|!avgrank / !elo|Sihirdarların lig ortalamasını gösterir
 |!mostplayed|Sihirdarın favori şampiyonunu gösterir
 |!streak|Sihirdarın kaç maçtır yenilmediğini gösterir
+|!mastery|Sihirdarların şampiyon ustalıklarını gösterir
 
 ### TFT
 |Komut|Açıklama|
@@ -30,7 +31,7 @@ Node.js axios kütüphanesi ile riot api kullanılarak twitch izleyicilerin oyun
 |!tftsummoner Name|İstatiklerin çekileceği hesap ismi
 |!tftregion TR|İstatiklerin çekileceği bölge
 |!tftrank|Sihirdarın ligini gösterir
-|!tftlastmatch|Sihirdarın son maç istatistiğini gösterir
+|!tftlastmatch / !tftlastgame|Sihirdarın son maç istatistiğini gösterir
 |!tftavg|Sihirdarın son maçlardaki ortalamasını gösterir
 
 ## Özelleştirme

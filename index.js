@@ -30,12 +30,7 @@ client.connect();
 
 client.on("connected", async (address, port) => {
   console.log(`Bot başarıyla Twitch sunucusuna bağlandı: ${address}:${port}`);
-
   try {
-    if (!TFT_SUMMONER_NAME) {
-      client.say(channel, "Önce bir LOL oyuncusu ayarlamalısınız. Kullanım: !lolsummoner <oyuncu_adı>");
-      return;
-    }
     const tftresponse = await axios.get(`https://${TFT_REGION}1.api.riotgames.com/tft/summoner/v1/summoners/by-name/${TFT_SUMMONER_NAME}?api_key=${RIOT_API_KEY}`);
     TFT_SUMMONER_NAME = tftresponse.data.name;
     TFT_SUMMONER_ID = tftresponse.data.id;
@@ -43,12 +38,7 @@ client.on("connected", async (address, port) => {
   } catch (error) {
     console.error('Hata oluştu:', error.response ? error.response.data : error.message);
   }
-
   try {
-    if (!LOL_SUMMONER_NAME) {
-      client.say(channel, "Önce bir LOL oyuncusu ayarlamalısınız. Kullanım: !lolsummoner <oyuncu_adı>");
-      return;
-    }
     const lolresponse = await axios.get(`https://${LOL_REGION}1.api.riotgames.com/lol/summoner/v4/summoners/by-name/${LOL_SUMMONER_NAME}?api_key=${RIOT_API_KEY}`);
     LOL_SUMMONER_NAME = lolresponse.data.name;
     LOL_SUMMONER_ID = lolresponse.data.id;
@@ -134,6 +124,9 @@ client.on("message", async (channel, userstate, message, self) => {
   } else if (lastcommand !== "streak" && command === "!streak") {
     SetDelay('streak');
     Flolstreak(channel);
+  } else if (lastcommand !== "mastery" && command === "!mastery") {
+    SetDelay('mastery');
+    FLolmastery(channel);
   } else if (lastcommand !== "commands" && (command === "!commands" || command == "!help")) {
     SetDelay('commands');
     client.say(channel, `LOL: !lolrank • !lollastmatch • !runes • !matchup • !winrate • !avgrank • !mostplayed • !streak | TFT: !tftrank • !tftlastmatch • !tftavg`);
@@ -245,40 +238,26 @@ async function FLolrunes(channel) {
   }
 }
 
-// LOL Matchup
+// LOL Summoners Rank
 async function FLolmatchup(channel) {
   try {
     const { data } = await axios.get(`https://${LOL_REGION}1.api.riotgames.com/lol/spectator/v4/active-games/by-summoner/${LOL_SUMMONER_ID}?api_key=${RIOT_API_KEY}`);
     const rankGroups = {};
-    await Promise.all(data.participants.map(async participant => {
+    for (const participant of data.participants) {
       const leagueResponse = await axios.get(`https://${LOL_REGION}1.api.riotgames.com/lol/league/v4/entries/by-summoner/${participant.summonerId}?api_key=${RIOT_API_KEY}`);
       const leagueInfo = leagueResponse.data.find(entry => entry.queueType === 'RANKED_SOLO_5x5');
-      let groupKey;
-      if (leagueInfo) {
-        const { tier, rank } = leagueInfo;
-        groupKey = `${tier} ${rank}`;
-      } else {
-        groupKey = 'UNRANKED';
-      }
-      if (!rankGroups[groupKey]) {
-        rankGroups[groupKey] = [];
-      }
+      const groupKey = leagueInfo ? `${leagueInfo.tier} ${leagueInfo.rank}` : 'UNRANKED';
+      rankGroups[groupKey] = rankGroups[groupKey] || [];
       rankGroups[groupKey].push(await getChampionName(participant.championId));
-    }));
-    const sortedRankGroups = Object.keys(rankGroups).sort((a, b) => ranks[a] - ranks[b]).reduce((obj, key) => {
-      obj[key] = rankGroups[key];
-      return obj;
-    }, {});
-    const sortedOutput = Object.entries(sortedRankGroups).map(([groupKey, champions]) => {
-      return `${groupKey} (${champions.join(", ")})`;
-    }).join(" • ");
+    }
+    const sortedRankGroups = Object.fromEntries(Object.entries(rankGroups).sort((a, b) => ranks[a[0]] - ranks[b[0]]));
+    const sortedOutput = Object.entries(sortedRankGroups).map(([groupKey, champions]) => `${groupKey} (${champions.join(", ")})`).join(" • ");
     client.say(channel, `${sortedOutput.replace(/(MASTER|GRANDMASTER|CHALLENGER) I/g, '$1').replace(new RegExp(Object.keys(translate).join("|"), "gi"), (match) => translate[match])}`);
   } catch (error) {
     client.say(channel, `Lig verileri alınamadı veya oyuncu maçta değil.`);
     console.error('Hata oluştu:', error.response ? error.response.data : error.message);
   }
 }
-
 
 // LOL Win Rate
 async function FLolwinrate(channel) {
@@ -298,24 +277,23 @@ async function FLolwinrate(channel) {
   }
 }
 
-// LOL Average Rank
+// LOL Summoners Average Rank
 async function FLolavg(channel) {
   try {
     const { data } = await axios.get(`https://${LOL_REGION}1.api.riotgames.com/lol/spectator/v4/active-games/by-summoner/${LOL_SUMMONER_ID}?api_key=${RIOT_API_KEY}`);
     let totalRankValue = 0;
     let totalPlayers = 0;
-    await Promise.all(data.participants.map(async participant => {
-      const { data } = await axios.get(`https://${LOL_REGION}1.api.riotgames.com/lol/league/v4/entries/by-summoner/${participant.summonerId}?api_key=${RIOT_API_KEY}`);
-      const leagueInfo = data.find((entry) => entry.queueType === "RANKED_SOLO_5x5");
+    for (const participant of data.participants) {
+      const { data: leagueData } = await axios.get(`https://${LOL_REGION}1.api.riotgames.com/lol/league/v4/entries/by-summoner/${participant.summonerId}?api_key=${RIOT_API_KEY}`);
+      const leagueInfo = leagueData.find((entry) => entry.queueType === "RANKED_SOLO_5x5");
       if (leagueInfo) {
         const { tier, rank } = leagueInfo;
         const rankValue = ranks[`${tier} ${rank}`] || 0;
         totalRankValue += rankValue;
         totalPlayers++;
       }
-    }));
-    let averageRankName = 'Bilinmeyen Rank';
-    for (const rank in ranks) if (ranks[rank] === Math.round(totalRankValue / totalPlayers)) averageRankName = rank;
+    }
+    let averageRankName = Object.keys(ranks).find(rank => ranks[rank] === Math.round(totalRankValue / totalPlayers)) || 'Bilinmeyen Rank';
     client.say(channel, `Lig ortalaması: ${averageRankName.replace(/(MASTER|GRANDMASTER|CHALLENGER) I/g, '$1').replace(new RegExp(Object.keys(translate).join("|"), "gi"), (match) => translate[match])}`);
   } catch (error) {
     client.say(channel, `Lig verileri alınamadı veya oyuncu maçta değil.`);
@@ -323,7 +301,7 @@ async function FLolavg(channel) {
   }
 }
 
-// LOL Mostplayed
+// LOL Most Played Champion
 async function FLolmostplayed(channel) {
   try {
     const { data: [{ championId, championPoints }] } = await axios.get(`https://${LOL_REGION}1.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-summoner/${LOL_SUMMONER_ID}?api_key=${RIOT_API_KEY}`);
@@ -334,7 +312,7 @@ async function FLolmostplayed(channel) {
   }
 }
 
-// LOL Streak
+// LOL Win Streak
 async function Flolstreak(channel) {
   try {
     const { data } = await axios.get(`https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/${LOL_SUMMONER_PUUID}/ids?start=0&count=100&api_key=${RIOT_API_KEY}`);
@@ -354,6 +332,28 @@ async function Flolstreak(channel) {
   }
 }
 
+// LOL Summoners Champion Mastery
+async function FLolmastery(channel) {
+  try {
+    const { data } = await axios.get(`https://${LOL_REGION}1.api.riotgames.com/lol/spectator/v4/active-games/by-summoner/${LOL_SUMMONER_ID}?api_key=${RIOT_API_KEY}`);
+    const sortedParticipants = data.participants.sort((a, b) => a.teamId - b.teamId);
+    const teamMessages = {};
+    for (const participant of sortedParticipants) {
+      const championId = participant.championId;
+      const { data: masteryData } = await axios.get(`https://${LOL_REGION}1.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-summoner/${participant.summonerId}?api_key=${RIOT_API_KEY}`);
+      const championMastery = masteryData.find(entry => entry.championId === championId);
+      const championName = await getChampionName(championId);
+      teamMessages[participant.teamId] = teamMessages[participant.teamId] || [];
+      teamMessages[participant.teamId].push(`${championName} (${championMastery ? formatMasteryPoints(championMastery.championPoints) : 0})`);
+    }
+    const message = Object.values(teamMessages).map(team => team.join(' • ')).join(' | ');
+    client.say(channel, message);
+  } catch (error) {
+    client.say(channel, `Ustalık puanları alınamadı veya oyuncu maçta değil.`);
+    console.error('Hata oluştu:', error.response ? error.response.data : error.message);
+  }
+}
+
 // STOCK
 const translate = { "UNRANKED": "Derecesiz", "IRON": "Demir", "BRONZE": "Bronz", "SILVER": "Gümüş", "GOLD": "Altın", "PLATINUM": "Platin", "EMERALD": "Zümrüt", "DIAMOND": "Elmas", "MASTER": "Ustalık", "GRANDMASTER": "Üstatlık", "CHALLENGER": "Şampiyonluk" };
 const ranks = { "UNRANKED": 0, "IRON IV": 1, "IRON III": 2, "IRON II": 3, "IRON I": 4, "BRONZE IV": 5, "BRONZE III": 6, "BRONZE II": 7, "BRONZE I": 8, "SILVER IV": 9, "SILVER III": 10, "SILVER II": 11, "SILVER I": 12, "GOLD IV": 13, "GOLD III": 14, "GOLD II": 15, "GOLD I": 16, "PLATINUM IV": 17, "PLATINUM III": 18, "PLATINUM II": 19, "PLATINUM I": 20, "EMERALD IV": 21, "EMERALD III": 22, "EMERALD II": 23, "EMERALD I": 24, "DIAMOND IV": 25, "DIAMOND III": 26, "DIAMOND II": 27, "DIAMOND I": 28, "MASTER I": 29, "GRANDMASTER I": 30, "CHALLENGER I": 31 };
@@ -369,7 +369,6 @@ async function getChampionName(championId) {
   try {
     const versionData = await (await fetch(`https://ddragon.leagueoflegends.com/api/versions.json`)).json();
     const championData = await (await fetch(`https://ddragon.leagueoflegends.com/cdn/${versionData[0]}/data/tr_TR/champion.json`)).json();
-
     const champion = Object.values(championData.data).find(champion => champion.key === String(championId));
     return champion ? champion.name : 'Bilinmeyen Karakter';
   } catch (error) {
