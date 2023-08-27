@@ -33,18 +33,20 @@ Node.js axios kütüphanesi ile riot api kullanılarak twitch izleyicilerin oyun
 |!tftrank|Sihirdarın ligini gösterir
 |!tftlastmatch / !tftlastgame|Sihirdarın son maç istatistiğini gösterir
 |!tftavg|Sihirdarın son maçlardaki ortalamasını gösterir
+|!tftitem / !bis|Şampiyonun yaygın eşya dizilimini gösterir
 
 ## Özelleştirme
 **RIOT_API_KEY** https://developer.riotgames.com/ üzerinden riot api anahtarını oluşturup girmeniz lazım.
 
-**TFT_SUMMONER_NAME** kod içerisinden veya !tftsummoner komutu ile değiştirmelisiniz.
-**TFT_REGION** kod içerisinden veya !tftregion komutu ile değiştirmelisiniz.
+**TFT_SUMMONER_NAME** değişkenini varsayılan olarak ayarlamalısınız, !tftsummoner komutu ile twitch chatinden değiştirebilirsiniz.
+**TFT_REGION** değişkenini varsayılan olarak ayarlamalısınız, !tftregion komutu ile twitch chatinden değiştirebilirsiniz.
 
-**LOL_SUMMONER_NAME** kod içerisinden veya !lolsummoner komutu ile değiştirmelisiniz.
-**LOL_REGION** kod içerisinden veya !lolregion komutu ile değiştirmelisiniz.
+**LOL_SUMMONER_NAME** değişkenini varsayılan olarak ayarlamalısınız, !lolsummoner komutu ile twitch chatinden değiştirebilirsiniz.
+**LOL_REGION** değişkenini varsayılan olarak ayarlamalısınız, !lolregion komutu ile twitch chatinden değiştirebilirsiniz.
 https://developer.riotgames.com/docs/lol
 > Eğer oynadığınız sunucu europe bölgesinde değil ise kod içerisinden europe apilerini düzeltmelisiniz.
 
 ## Emeği Geçenler
 [ByDexterTR](https://github.com/ByDexterTR)
+
 [Rewokun](https://github.com/rewokun)
