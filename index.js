@@ -89,12 +89,11 @@ client.on('message', async (channel, userstate, message, self) => {
     { cmd: '!runes', key: 'runes', func: FLolrunes },
     { cmd: '!matchup', key: 'matchup', func: FLolmatchup },
     { cmd: '!winrate', key: 'winrate', func: FLolwinrate }, { cmd: '!wr', key: 'winrate', func: FLolwinrate },
-    { cmd: '!winrate', key: 'winrate', func: FLolwinrate }, { cmd: '!elo', key: 'winrate', func: FLolwinrate },
+    { cmd: '!avgrank', key: 'avgrank', func: FLolavg }, { cmd: '!elo', key: 'avgrank', func: FLolavg },
     { cmd: '!mostplayed', key: 'mostplayed', func: FLolmostplayed },
     { cmd: '!streak', key: 'streak', func: Flolstreak },
     { cmd: '!mastery', key: 'mastery', func: FLolmastery },
-    { cmd: '!commands', key: 'commands', func: Commandslist },
-    { cmd: '!help', key: 'commands', func: Commandslist }
+    { cmd: '!commands', key: 'commands', func: Commandslist }, { cmd: '!help', key: 'commands', func: Commandslist }
   ];
   commands.forEach(({ cmd, key, func }) => {
     if (lastcommand !== key && command === cmd) {

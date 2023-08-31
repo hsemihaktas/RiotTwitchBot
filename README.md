@@ -8,7 +8,7 @@ Node.js axios kütüphanesi ile riot api kullanılarak twitch izleyicilerin oyun
 ### Genel
 |Komut|Açıklama|
 |-|-|
-|!commands/!help|Komut listesini gösterir
+|!commands/!help             |Komut listesini gösterir                     
 
 ### LOL
 |Komut|Açıklama|
@@ -23,7 +23,7 @@ Node.js axios kütüphanesi ile riot api kullanılarak twitch izleyicilerin oyun
 |!avgrank / !elo|Sihirdarların lig ortalamasını gösterir
 |!mostplayed|Sihirdarın favori şampiyonunu gösterir
 |!streak|Sihirdarın kaç maçtır yenilmediğini gösterir
-|!mastery|Sihirdarların şampiyon ustalıklarını gösterir
+|!mastery|Sihirdarların şampiyon ustalıklarını gösterir  
 
 ### TFT
 |Komut|Açıklama|
