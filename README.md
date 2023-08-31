@@ -33,7 +33,7 @@ Node.js axios kütüphanesi ile riot api kullanılarak twitch izleyicilerin oyun
 |!tftrank|Sihirdarın ligini gösterir
 |!tftlastmatch / !tftlastgame|Sihirdarın son maç istatistiğini gösterir
 |!tftavg|Sihirdarın son maçlardaki ortalamasını gösterir
-|!tftitem / !bis|Şampiyonun yaygın eşya dizilimini gösterir
+|!tftitem / !bis Karakter|Şampiyonun yaygın eşya dizilimini gösterir
 
 ## Özelleştirme
 **RIOT_API_KEY** https://developer.riotgames.com/ üzerinden riot api anahtarını oluşturup girmeniz lazım.

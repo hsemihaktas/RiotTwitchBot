@@ -46,82 +46,69 @@ client.on('connected', async (address, port) => {
 
 client.on('message', async (channel, userstate, message, self) => {
   if (self || boolen || !message.startsWith('!')) return;
+  const [command, value] = message.split(' ');
   const badges = userstate.badges;
   if (badges && (badges.moderator || badges.broadcaster)) {
-    if (message.startsWith('!tftsummoner')) {
+    if (command === '!tftsummoner') {
       try {
-        const response = await axios.get(`https://${TFT_REGION}1.api.riotgames.com/tft/summoner/v1/summoners/by-name/${message.split(' ')[1]}?api_key=${RIOT_API_KEY}`);
+        const response = await axios.get(`https://${TFT_REGION}1.api.riotgames.com/tft/summoner/v1/summoners/by-name/${value}?api_key=${RIOT_API_KEY}`);
         TFT_SUMMONER_NAME = response.data.name;
         TFT_SUMMONER_ID = response.data.id;
         TFT_SUMMONER_PUUID = response.data.puuid;
         reply(userstate.id, channel, `TFT sihirdarı '${TFT_SUMMONER_NAME}' olarak ayarlandı.`);
       } catch (error) {
-        reply(userstate.id, channel, `${message.split(' ')[1]}(${TFT_REGION}) sihirdarı bulunamadı.`);
+        reply(userstate.id, channel, `${value}(${TFT_REGION}) sihirdarı bulunamadı.`);
         console.error('Hata oluştu:', error.response ? error.response.data : error.message);
       }
-    } else if (message.startsWith('!tftregion')) {
-      TFT_REGION = message.split(' ')[1];
+    } else if (command === '!tftregion') {
+      TFT_REGION = value;
       reply(userstate.id, channel, `TFT bölgesi '${TFT_REGION}' olarak ayarlandı.`);
-    } else if (message.startsWith('!lolsummoner')) {
+    } else if (command === '!lolsummoner') {
       try {
-        const response = await axios.get(`https://${LOL_REGION}1.api.riotgames.com/lol/summoner/v4/summoners/by-name/${message.split(' ')[1]}?api_key=${RIOT_API_KEY}`);
+        const response = await axios.get(`https://${LOL_REGION}1.api.riotgames.com/lol/summoner/v4/summoners/by-name/${value}?api_key=${RIOT_API_KEY}`);
         LOL_SUMMONER_NAME = response.data.name;
         LOL_SUMMONER_ID = response.data.id;
         LOL_SUMMONER_PUUID = response.data.puuid;
         reply(userstate.id, channel, `LOL sihirdarı '${LOL_SUMMONER_NAME}' olarak ayarlandı.`);
       } catch (error) {
-        reply(userstate.id, channel, `${message.split(' ')[1]}(${LOL_REGION}) sihirdarı bulunamadı.`);
+        reply(userstate.id, channel, `${value}(${LOL_REGION}) sihirdarı bulunamadı.`);
         console.error('Hata oluştu:', error.response ? error.response.data : error.message);
       }
-    } else if (message.startsWith('!lolregion')) {
-      LOL_REGION = message.split(' ')[1];
+    } else if (command === '!lolregion') {
+      LOL_REGION = value;
       reply(userstate.id, channel, `TFT bölgesi '${LOL_REGION}' olarak ayarlandı.`);
     }
   }
-  if (lastcommand !== 'tftrank' && message.startsWith('!tftrank')) {
-    SetDelay('tftrank');
-    FTftrank(channel, userstate.id);
-  } else if (lastcommand !== 'tftlastmatch' && (message.startsWith('!tftlastmatch') || message.startsWith('!tftlastgame'))) {
-    SetDelay('tftlastmatch');
-    FTftlastmatch(channel, userstate.id);
-  } else if (lastcommand !== 'tftavg' && message.startsWith('!tftavg')) {
-    SetDelay('tftavg');
-    FTftavg(channel, userstate.id);
-  } else if (lastcommand !== 'tftitem' && (message.startsWith('!tftitem') || message.startsWith('!bis'))) {
-    SetDelay('tftitem');
-    FTftitem(channel, message.split(' ')[1], userstate.id);
-  } else if (lastcommand !== 'lolrank' && message.startsWith('!lolrank')) {
-    SetDelay('lolrank');
-    FLolrank(channel, userstate.id);
-  } else if (lastcommand !== 'lollastmatch' && (message.startsWith('!lollastmatch') || message.startsWith('!lollastgame'))) {
-    SetDelay('lollastmatch');
-    FLollastmatch(channel, userstate.id);
-  } else if (lastcommand !== 'runes' && message.startsWith('!runes')) {
-    SetDelay('runes');
-    FLolrunes(channel, userstate.id);
-  } else if (lastcommand !== 'matchup' && message.startsWith('!matchup')) {
-    SetDelay('matchup');
-    FLolmatchup(channel, userstate.id);
-  } else if (lastcommand !== 'winrate' && (message.startsWith('!winrate') || message.startsWith('!wr'))) {
-    SetDelay('winrate');
-    FLolwinrate(channel, userstate.id);
-  } else if (lastcommand !== 'avgrank' && (message.startsWith('!avgrank') || message.startsWith('!elo'))) {
-    SetDelay('avgrank');
-    FLolavg(channel, userstate.id);
-  } else if (lastcommand !== 'mostplayed' && message.startsWith('!mostplayed')) {
-    SetDelay('mostplayed');
-    FLolmostplayed(channel, userstate.id);
-  } else if (lastcommand !== 'streak' && message.startsWith('!streak')) {
-    SetDelay('streak');
-    Flolstreak(channel, userstate.id);
-  } else if (lastcommand !== 'mastery' && message.startsWith('!mastery')) {
-    SetDelay('mastery');
-    FLolmastery(channel, userstate.id);
-  } else if (lastcommand !== 'commands' && (message.startsWith('!commands') || message.startsWith('!help'))) {
-    SetDelay('commands');
-    reply(userstate.id, channel, `LOL: !lolrank • !lollastmatch • !runes • !matchup • !winrate • !avgrank • !mostplayed • !streak • !mastery | TFT: !tftrank • !tftlastmatch • !tftavg • !tftitem CHAMP`);
-  }
+  const commands = [
+    { cmd: '!tftrank', key: 'tftrank', func: FTftrank },
+    { cmd: '!tftlastmatch', key: 'tftlastmatch', func: FTftlastmatch }, { cmd: '!tftlastgame', key: 'tftlastmatch', func: FTftlastmatch },
+    { cmd: '!tftavg', key: 'tftavg', func: FTftavg },
+    { cmd: '!tftitem', key: 'tftitem', func: FTftitem }, { cmd: '!bis', key: 'tftitem', func: FTftitem },
+    { cmd: '!lolrank', key: 'lolrank', func: FLolrank },
+    { cmd: '!lollastmatch', key: 'lollastmatch', func: FLollastmatch }, { cmd: '!lollastgame', key: 'lollastmatch', func: FLollastmatch },
+    { cmd: '!runes', key: 'runes', func: FLolrunes },
+    { cmd: '!matchup', key: 'matchup', func: FLolmatchup },
+    { cmd: '!winrate', key: 'winrate', func: FLolwinrate }, { cmd: '!wr', key: 'winrate', func: FLolwinrate },
+    { cmd: '!winrate', key: 'winrate', func: FLolwinrate }, { cmd: '!elo', key: 'winrate', func: FLolwinrate },
+    { cmd: '!mostplayed', key: 'mostplayed', func: FLolmostplayed },
+    { cmd: '!streak', key: 'streak', func: Flolstreak },
+    { cmd: '!mastery', key: 'mastery', func: FLolmastery },
+    { cmd: '!commands', key: 'commands', func: Commandslist },
+    { cmd: '!help', key: 'commands', func: Commandslist }
+  ];
+  commands.forEach(({ cmd, key, func }) => {
+    if (lastcommand !== key && command === cmd) {
+      SetDelay(key);
+      if (key === 'tftitem' && value !== undefined) func(channel, value, userstate.id);
+      else func(channel, userstate.id);
+    }
+  });
 });
+
+// Commands List
+function Commandslist(channel, username) {
+  reply(username, channel, `LOL: !lolrank • !lollastmatch • !runes • !matchup • !winrate • !avgrank • !mostplayed • !streak • !mastery | TFT: !tftrank • !tftlastmatch • !tftavg • !tftitem Karakter`);
+}
 
 // TFT Rank
 async function FTftrank(channel, username) {
@@ -155,14 +142,13 @@ async function FTftlastmatch(channel, username) {
 // TFT Average Placement
 async function FTftavg(channel, username) {
   try {
-    const matchList = await axios.get(`https://europe.api.riotgames.com/tft/match/v1/matches/by-puuid/${TFT_SUMMONER_PUUID}/ids?api_key=${RIOT_API_KEY}`);
-    const matchIds = matchList.data;
+    const { data } = await axios.get(`https://europe.api.riotgames.com/tft/match/v1/matches/by-puuid/${TFT_SUMMONER_PUUID}/ids?api_key=${RIOT_API_KEY}`);
     let totalPlacement = 0;
-    for (const matchId of matchIds) {
+    for (const matchId of data) {
       const matchDetails = await axios.get(`https://europe.api.riotgames.com/tft/match/v1/matches/${matchId}?api_key=${RIOT_API_KEY}`);
       totalPlacement += matchDetails.data.info.participants.find(participant => participant.puuid === TFT_SUMMONER_PUUID)?.placement;
     }
-    reply(username, channel, `${TFT_SUMMONER_NAME} • ${matchIds.length} maç • Ortalama ${Math.floor(totalPlacement / matchIds.length * 10) / 10}`);
+    reply(username, channel, `${TFT_SUMMONER_NAME} • ${data.length} maç • Ortalama ${Math.floor(totalPlacement / data.length * 10) / 10}`);
   } catch (error) {
     reply(username, channel, `Maç geçmişi alınamadı.`);
     console.error('Hata oluştu:', error.response ? error.response.data : error.message);
@@ -174,7 +160,7 @@ async function FTftitem(channel, message, username) {
   try {
     const data = await (await fetch('https://raw.githubusercontent.com/ByDexterTR/RiotTwitchBot/main/node_modules/champions_data.json')).json();
     const character = data.find((champion) => champion.name.toLowerCase() === message.toLowerCase());
-    reply(username, channel, character ? `${character.name} • ${character.items.join(' - ')}` : `@${username}, Karakter bulunamadı: ${message}`);
+    reply(username, channel, character ? `${character.name} • ${character.items.join(' - ')}` : `Karakter bulunamadı: ${message}`);
   } catch (error) {
     reply(username, channel, `Eşya dizilimleri alınamadı.`);
     console.error('Hata oluştu:', error.response ? error.response.data : error.message);
@@ -350,7 +336,7 @@ async function FLolmastery(channel, username) {
 const translate = { 'UNRANKED': 'Derecesiz', 'IRON': 'Demir', 'BRONZE': 'Bronz', 'SILVER': 'Gümüş', 'GOLD': 'Altın', 'PLATINUM': 'Platin', 'EMERALD': 'Zümrüt', 'DIAMOND': 'Elmas', 'MASTER': 'Ustalık', 'GRANDMASTER': 'Üstatlık', 'CHALLENGER': 'Şampiyonluk' };
 const ranks = { 'UNRANKED': 0, 'IRON IV': 1, 'IRON III': 2, 'IRON II': 3, 'IRON I': 4, 'BRONZE IV': 5, 'BRONZE III': 6, 'BRONZE II': 7, 'BRONZE I': 8, 'SILVER IV': 9, 'SILVER III': 10, 'SILVER II': 11, 'SILVER I': 12, 'GOLD IV': 13, 'GOLD III': 14, 'GOLD II': 15, 'GOLD I': 16, 'PLATINUM IV': 17, 'PLATINUM III': 18, 'PLATINUM II': 19, 'PLATINUM I': 20, 'EMERALD IV': 21, 'EMERALD III': 22, 'EMERALD II': 23, 'EMERALD I': 24, 'DIAMOND IV': 25, 'DIAMOND III': 26, 'DIAMOND II': 27, 'DIAMOND I': 28, 'MASTER I': 29, 'GRANDMASTER I': 30, 'CHALLENGER I': 31 };
 
-async function SetDelay(command) {
+function SetDelay(command) {
   boolen = true;
   setTimeout(() => { boolen = false; }, 2000);
   lastcommand = command;
