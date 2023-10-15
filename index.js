@@ -93,6 +93,7 @@ client.on('message', async (channel, userstate, message, self) => {
     { cmd: '!mostplayed', key: 'mostplayed', func: FLolmostplayed },
     { cmd: '!streak', key: 'streak', func: Flolstreak },
     { cmd: '!mastery', key: 'mastery', func: FLolmastery },
+    { cmd: '!levels', key: 'levels', func: FLollevels },
     { cmd: '!commands', key: 'commands', func: Commandslist }, { cmd: '!help', key: 'commands', func: Commandslist }
   ];
   commands.forEach(({ cmd, key, func }) => {
@@ -106,7 +107,7 @@ client.on('message', async (channel, userstate, message, self) => {
 
 // Commands List
 function Commandslist(channel, username) {
-  reply(username, channel, `LOL: !lolrank • !lollastmatch • !runes • !matchup • !winrate • !avgrank • !mostplayed • !streak • !mastery | TFT: !tftrank • !tftlastmatch • !tftavg • !tftitem Karakter`);
+  reply(username, channel, `LOL: !lolrank !lollastmatch !runes !matchup !winrate !avgrank !mostplayed !streak !mastery !levels • TFT: !tftrank !tftlastmatch !tftavg !tftitem Karakter`);
 }
 
 // TFT Rank
@@ -212,7 +213,7 @@ async function FLolrunes(channel, username) {
       }
       return 'Bilinmeyen Rün';
     });
-    reply(username, channel, `${await getChampionName(player.championId)} • ${perkNames.slice(0, 4).join(' - ')} | ${perkNames.slice(4).join(' - ')}`);
+    reply(username, channel, `${await getChampionName(player.championId)} • ${perkNames.slice(0, 4).join(', ')} • ${perkNames.slice(4).join(', ')}`);
   } catch (error) {
     reply(username, channel, `Rün verileri alınamadı veya oyuncu maçta değil.`);
     console.error('Hata oluştu:', error.response ? error.response.data : error.message);
@@ -272,7 +273,7 @@ async function FLolavg(channel, username) {
       }
     }
     let averageRankName = Object.keys(ranks).find(rank => ranks[rank] === Math.round(totalRankValue / totalPlayers)) || 'Bilinmeyen Rank';
-    reply(username, channel, `Lig ortalaması: ${averageRankName.replace(/(MASTER|GRANDMASTER|CHALLENGER) I/g, '$1').replace(new RegExp(Object.keys(translate).join('|'), 'gi'), (match) => translate[match])}`);
+    reply(username, channel, `Lig ortalaması • ${averageRankName.replace(/(MASTER|GRANDMASTER|CHALLENGER) I/g, '$1').replace(new RegExp(Object.keys(translate).join('|'), 'gi'), (match) => translate[match])}`);
   } catch (error) {
     reply(username, channel, `Lig verileri alınamadı veya oyuncu maçta değil.`);
     console.error('Hata oluştu:', error.response ? error.response.data : error.message);
@@ -321,12 +322,33 @@ async function FLolmastery(channel, username) {
       const { data: masteryData } = await axios.get(`https://${LOL_REGION}1.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-summoner/${participant.summonerId}?api_key=${RIOT_API_KEY}`);
       const championMastery = masteryData.find(entry => entry.championId === championId);
       teamMessages[participant.teamId] = teamMessages[participant.teamId] || [];
-      teamMessages[participant.teamId].push(`${await getChampionName(championId)} (${championMastery ? formatMasteryPoints(championMastery.championPoints) : 0})`);
+      teamMessages[participant.teamId].push(`${await getChampionName(championId)} ${championMastery ? formatMasteryPoints(championMastery.championPoints) : 0}`);
     }
-    const message = Object.values(teamMessages).map(team => team.join(' • ')).join(' | ');
+    const message = Object.values(teamMessages).map(team => team.join(', ')).join(' • ');
     reply(username, channel, message);
   } catch (error) {
     reply(username, channel, `Ustalık puanları alınamadı veya oyuncu maçta değil.`);
+    console.error('Hata oluştu:', error.response ? error.response.data : error.message);
+  }
+}
+
+// LOL Summoners Level
+async function FLollevels(channel, username) {
+  try {
+    const { data } = await axios.get(`https://${LOL_REGION}1.api.riotgames.com/lol/spectator/v4/active-games/by-summoner/${LOL_SUMMONER_ID}?api_key=${RIOT_API_KEY}`);
+    const sortedParticipants = data.participants.sort((a, b) => a.teamId - b.teamId);
+    const teamMessages = {};
+    for (const participant of sortedParticipants) {
+      const championId = participant.championId;
+      const { data: levelData } = await axios.get(`https://${LOL_REGION}1.api.riotgames.com/lol/summoner/v4/summoners/by-name/${participant.summonerName}?api_key=${RIOT_API_KEY}`);
+      const summonerLevel = levelData.summonerLevel;
+      teamMessages[participant.teamId] = teamMessages[participant.teamId] || [];
+      teamMessages[participant.teamId].push(`${await getChampionName(championId)} ${summonerLevel}Lv`);
+    }
+    const message = Object.values(teamMessages).map(team => team.join(', ')).join(' • ');
+    reply(username, channel, message);
+  } catch (error) {
+    reply(username, channel, `Seviyeler alınamadı veya oyuncu maçta değil.`);
     console.error('Hata oluştu:', error.response ? error.response.data : error.message);
   }
 }

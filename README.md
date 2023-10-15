@@ -23,7 +23,8 @@ Node.js axios kütüphanesi ile riot api kullanılarak twitch izleyicilerin oyun
 |!avgrank / !elo|Sihirdarların lig ortalamasını gösterir
 |!mostplayed|Sihirdarın favori şampiyonunu gösterir
 |!streak|Sihirdarın kaç maçtır yenilmediğini gösterir
-|!mastery|Sihirdarların şampiyon ustalıklarını gösterir  
+|!mastery|Sihirdarların şampiyon ustalıklarını gösterir 
+|!levels|Sihirdarların seviyelerini gösterir  
 
 ### TFT
 |Komut|Açıklama|
