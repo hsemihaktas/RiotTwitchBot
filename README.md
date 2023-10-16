@@ -50,4 +50,4 @@ https://developer.riotgames.com/docs/lol
 ## Emeği Geçenler
 [ByDexterTR](https://github.com/ByDexterTR)
 
-[Rewokun](https://github.com/rewokun)
+[SemiH](https://github.com/hsemihaktas)
