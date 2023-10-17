@@ -30,85 +30,46 @@ client.connect();
 
 client.on('connected', async (address, port) => {
   console.log(`Bot başarıyla Twitch sunucusuna bağlandı: ${address}:${port}`);
-  try {
-    const tftresponse = await axios.get(`https://${TFT_REGION}1.api.riotgames.com/tft/summoner/v1/summoners/by-name/${TFT_SUMMONER_NAME}?api_key=${RIOT_API_KEY}`);
-    TFT_SUMMONER_NAME = tftresponse.data.name;
-    TFT_SUMMONER_ID = tftresponse.data.id;
-    TFT_SUMMONER_PUUID = tftresponse.data.puuid;
-    const lolresponse = await axios.get(`https://${LOL_REGION}1.api.riotgames.com/lol/summoner/v4/summoners/by-name/${LOL_SUMMONER_NAME}?api_key=${RIOT_API_KEY}`);
-    LOL_SUMMONER_NAME = lolresponse.data.name;
-    LOL_SUMMONER_ID = lolresponse.data.id;
-    LOL_SUMMONER_PUUID = lolresponse.data.puuid;
-  } catch (error) {
-    console.error('Hata oluştu:', error.response ? error.response.data : error.message);
-  }
+  Precache('tft', undefined, undefined);
+  Precache('lol', undefined, undefined);
 });
 
 client.on('message', async (channel, userstate, message, self) => {
   if (self || boolen || !message.startsWith('!')) return;
-  const [command, value] = message.split(' ');
-  const badges = userstate.badges;
-  if (badges && (badges.moderator || badges.broadcaster)) {
+  const spaceIndex = message.indexOf(' ');
+  const command = spaceIndex !== -1 ? message.substring(0, spaceIndex) : message;
+  const value = spaceIndex !== -1 ? message.substring(spaceIndex + 1) : '';
+  if (userstate.badges && (userstate.badges.moderator || userstate.badges.broadcaster)) {
     if (command === '!tftsummoner') {
-      try {
-        const response = await axios.get(`https://${TFT_REGION}1.api.riotgames.com/tft/summoner/v1/summoners/by-name/${value}?api_key=${RIOT_API_KEY}`);
-        TFT_SUMMONER_NAME = response.data.name;
-        TFT_SUMMONER_ID = response.data.id;
-        TFT_SUMMONER_PUUID = response.data.puuid;
-        reply(userstate.id, channel, `TFT sihirdarı '${TFT_SUMMONER_NAME}' olarak ayarlandı.`);
-      } catch (error) {
-        reply(userstate.id, channel, `${value}(${TFT_REGION}) sihirdarı bulunamadı.`);
-        console.error('Hata oluştu:', error.response ? error.response.data : error.message);
-      }
+      TFT_SUMMONER_NAME = value;
+      Precache('tft', userstate.id, channel);
     } else if (command === '!tftregion') {
       TFT_REGION = value;
-      reply(userstate.id, channel, `TFT bölgesi '${TFT_REGION}' olarak ayarlandı.`);
+      Precache('tft', userstate.id, channel);
     } else if (command === '!lolsummoner') {
-      try {
-        const response = await axios.get(`https://${LOL_REGION}1.api.riotgames.com/lol/summoner/v4/summoners/by-name/${value}?api_key=${RIOT_API_KEY}`);
-        LOL_SUMMONER_NAME = response.data.name;
-        LOL_SUMMONER_ID = response.data.id;
-        LOL_SUMMONER_PUUID = response.data.puuid;
-        reply(userstate.id, channel, `LOL sihirdarı '${LOL_SUMMONER_NAME}' olarak ayarlandı.`);
-      } catch (error) {
-        reply(userstate.id, channel, `${value}(${LOL_REGION}) sihirdarı bulunamadı.`);
-        console.error('Hata oluştu:', error.response ? error.response.data : error.message);
-      }
+      LOL_SUMMONER_NAME = value;
+      Precache('lol', userstate.id, channel);
     } else if (command === '!lolregion') {
       LOL_REGION = value;
-      reply(userstate.id, channel, `LOL bölgesi '${LOL_REGION}' olarak ayarlandı.`);
+      Precache('lol', userstate.id, channel);
     }
   }
   const commands = [
-    { cmd: '!tftrank', key: 'tftrank', func: FTftrank },
-    { cmd: '!tftlastmatch', key: 'tftlastmatch', func: FTftlastmatch }, { cmd: '!tftlastgame', key: 'tftlastmatch', func: FTftlastmatch },
-    { cmd: '!tftavg', key: 'tftavg', func: FTftavg },
-    { cmd: '!tftitem', key: 'tftitem', func: FTftitem }, { cmd: '!bis', key: 'tftitem', func: FTftitem },
-    { cmd: '!lolrank', key: 'lolrank', func: FLolrank },
-    { cmd: '!lollastmatch', key: 'lollastmatch', func: FLollastmatch }, { cmd: '!lollastgame', key: 'lollastmatch', func: FLollastmatch },
-    { cmd: '!runes', key: 'runes', func: FLolrunes },
-    { cmd: '!matchup', key: 'matchup', func: FLolmatchup },
-    { cmd: '!winrate', key: 'winrate', func: FLolwinrate }, { cmd: '!wr', key: 'winrate', func: FLolwinrate },
-    { cmd: '!avgrank', key: 'avgrank', func: FLolavg }, { cmd: '!elo', key: 'avgrank', func: FLolavg },
-    { cmd: '!mostplayed', key: 'mostplayed', func: FLolmostplayed },
-    { cmd: '!streak', key: 'streak', func: Flolstreak },
-    { cmd: '!mastery', key: 'mastery', func: FLolmastery },
-    { cmd: '!levels', key: 'levels', func: FLollevels },
-    { cmd: '!commands', key: 'commands', func: Commandslist }, { cmd: '!help', key: 'commands', func: Commandslist }
+    { cmd: '!tftrank', key: 'tftrank', func: FTftrank }, { cmd: '!tftlastmatch,!tftlastgame', key: 'tftlastmatch', func: FTftlastmatch }, { cmd: '!tftavg', key: 'tftavg', func: FTftavg }, { cmd: '!tftitem, !bis', key: 'tftitem', func: FTftitem },
+    { cmd: '!lolrank', key: 'lolrank', func: FLolrank }, { cmd: '!lollastmatch,!lollastgame', key: 'lollastmatch', func: FLollastmatch }, { cmd: '!runes', key: 'runes', func: FLolrunes }, { cmd: '!matchup', key: 'matchup', func: FLolmatchup }, { cmd: '!winrate,!wr', key: 'winrate', func: FLolwinrate }, { cmd: '!avgrank,!elo', key: 'avgrank', func: FLolavg }, { cmd: '!mostplayed', key: 'mostplayed', func: FLolmostplayed }, { cmd: '!streak', key: 'streak', func: Flolstreak }, { cmd: '!mastery', key: 'mastery', func: FLolmastery }, { cmd: '!levels', key: 'levels', func: FLollevels },
+    { cmd: '!commands,!help', key: 'commands', func: undefined }
   ];
   commands.forEach(({ cmd, key, func }) => {
-    if (lastcommand !== key && command === cmd) {
+    if (lastcommand !== key && cmd.split(',').includes(command)) {
       SetDelay(key);
-      if (key === 'tftitem' && value !== undefined) func(channel, value, userstate.id);
+      if ((TFT_SUMMONER_ID === undefined || TFT_SUMMONER_PUUID === undefined) && (key === 'tftrank' || key === 'tftlastmatch' || key === 'tftavg' || key === 'tftitem')) reply(userstate.id, channel, `TFT sihirdarı ayarlı değil, modlara veya yayıncıya !tftsummoner & !tftregion komutlarıyla ayarlamasını isteyin.`);
+      else if ((LOL_SUMMONER_ID === undefined || LOL_SUMMONER_PUUID === undefined) && (key === 'lolrank' || key === 'lollastmatch' || key === 'runes' || key === 'matchup' || key === 'winrate' || key === 'avgrank' || key === 'mostplayed' || key === 'streak' || key === 'mastery' || key === 'levels')) reply(userstate.id, channel, `LOL sihirdarı ayarlı değil, modlara veya yayıncıya !lolsummoner & !lolregion komutlarıyla ayarlamasını isteyin.`);
+      else if (key === 'tftitem' && value !== undefined) func(channel, value, userstate.id);
+      else if (key === 'commands') reply(userstate.id, channel, `LOL: !lolrank !lollastmatch !runes !matchup !winrate !avgrank !mostplayed !streak !mastery !levels • TFT: !tftrank !tftlastmatch !tftavg !tftitem Karakter`);
       else func(channel, userstate.id);
     }
   });
 });
-
-// Commands List
-function Commandslist(channel, username) {
-  reply(username, channel, `LOL: !lolrank !lollastmatch !runes !matchup !winrate !avgrank !mostplayed !streak !mastery !levels • TFT: !tftrank !tftlastmatch !tftavg !tftitem Karakter`);
-}
 
 // TFT Rank
 async function FTftrank(channel, username) {
@@ -356,6 +317,40 @@ async function FLollevels(channel, username) {
 // STOCK
 const translate = { 'UNRANKED': 'Derecesiz', 'IRON': 'Demir', 'BRONZE': 'Bronz', 'SILVER': 'Gümüş', 'GOLD': 'Altın', 'PLATINUM': 'Platin', 'EMERALD': 'Zümrüt', 'DIAMOND': 'Elmas', 'MASTER': 'Ustalık', 'GRANDMASTER': 'Üstatlık', 'CHALLENGER': 'Şampiyonluk' };
 const ranks = { 'UNRANKED': 0, 'IRON IV': 1, 'IRON III': 2, 'IRON II': 3, 'IRON I': 4, 'BRONZE IV': 5, 'BRONZE III': 6, 'BRONZE II': 7, 'BRONZE I': 8, 'SILVER IV': 9, 'SILVER III': 10, 'SILVER II': 11, 'SILVER I': 12, 'GOLD IV': 13, 'GOLD III': 14, 'GOLD II': 15, 'GOLD I': 16, 'PLATINUM IV': 17, 'PLATINUM III': 18, 'PLATINUM II': 19, 'PLATINUM I': 20, 'EMERALD IV': 21, 'EMERALD III': 22, 'EMERALD II': 23, 'EMERALD I': 24, 'DIAMOND IV': 25, 'DIAMOND III': 26, 'DIAMOND II': 27, 'DIAMOND I': 28, 'MASTER I': 29, 'GRANDMASTER I': 30, 'CHALLENGER I': 31 };
+
+async function Precache(game, username, channel) {
+  if (game === 'tft') {
+    try {
+      const tftresponse = await axios.get(`https://${TFT_REGION}1.api.riotgames.com/tft/summoner/v1/summoners/by-name/${TFT_SUMMONER_NAME}?api_key=${RIOT_API_KEY}`);
+      TFT_SUMMONER_NAME = tftresponse.data.name;
+      TFT_SUMMONER_ID = tftresponse.data.id;
+      TFT_SUMMONER_PUUID = tftresponse.data.puuid;
+      if (username !== undefined) reply(username, channel, `TFT sihirdarı ayarlandı, ${TFT_SUMMONER_NAME}(${TFT_REGION})`);
+      else console.log(`TFT sihirdarı ayarlandı, ${TFT_SUMMONER_NAME}(${TFT_REGION})`);
+    } catch (error) {
+      if (username !== undefined) reply(username, channel, `${TFT_SUMMONER_NAME}(${TFT_REGION}) sihirdarı bulunamadı, !tftregion & !tftsummoner ile ayarlayın.`);
+      else console.log(`${LOL_SUMMONERTFT_SUMMONER_NAME_NAME}(${TFT_REGION}) sihirdarı bulunamadı, !tftregion & !tftsummoner ile ayarlayın.`);
+      console.error('Hata oluştu:', error.response ? error.response.data : error.message);
+      TFT_SUMMONER_ID = undefined;
+      TFT_SUMMONER_PUUID = undefined;
+    }
+  } else {
+    try {
+      const lolresponse = await axios.get(`https://${LOL_REGION}1.api.riotgames.com/lol/summoner/v4/summoners/by-name/${LOL_SUMMONER_NAME}?api_key=${RIOT_API_KEY}`);
+      LOL_SUMMONER_NAME = lolresponse.data.name;
+      LOL_SUMMONER_ID = lolresponse.data.id;
+      LOL_SUMMONER_PUUID = lolresponse.data.puuid;
+      if (username !== undefined) reply(username, channel, `LOL sihirdarı ayarlandı, ${LOL_SUMMONER_NAME}(${LOL_REGION})`);
+      else console.log(`LOL sihirdarı ayarlandı, ${LOL_SUMMONER_NAME}(${LOL_REGION})`);
+    } catch (error) {
+      if (username !== undefined) reply(username, channel, `${LOL_SUMMONER_NAME}(${LOL_REGION}) sihirdarı bulunamadı, !lolregion & !lolsummoner ile ayarlayın.`);
+      else console.log(`${LOL_SUMMONER_NAME}(${LOL_REGION}) sihirdarı bulunamadı, !lolregion & !lolsummoner ile ayarlayın.`);
+      console.error('Hata oluştu:', error.response ? error.response.data : error.message);
+      LOL_SUMMONER_ID = undefined;
+      LOL_SUMMONER_PUUID = undefined;
+    }
+  }
+}
 
 async function getChampionName(championId) {
   try {
