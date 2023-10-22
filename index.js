@@ -329,7 +329,7 @@ async function Precache(game, username, channel) {
       else console.log(`TFT sihirdarı ayarlandı, ${TFT_SUMMONER_NAME}(${TFT_REGION})`);
     } catch (error) {
       if (username !== undefined) reply(username, channel, `${TFT_SUMMONER_NAME}(${TFT_REGION}) sihirdarı bulunamadı, !tftregion & !tftsummoner ile ayarlayın.`);
-      else console.log(`${LOL_SUMMONERTFT_SUMMONER_NAME_NAME}(${TFT_REGION}) sihirdarı bulunamadı, !tftregion & !tftsummoner ile ayarlayın.`);
+      else console.log(`${TFT_SUMMONER_NAME}(${TFT_REGION}) sihirdarı bulunamadı, !tftregion & !tftsummoner ile ayarlayın.`);
       console.error('Hata oluştu:', error.response ? error.response.data : error.message);
       TFT_SUMMONER_ID = undefined;
       TFT_SUMMONER_PUUID = undefined;
