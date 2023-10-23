@@ -1,23 +1,36 @@
 {
-  "name": "creedgpt",
-  "version": "1.0.0",
-  "description": "",
+  "name": "riottwitchbot",
+  "version": "1.4.6",
+  "description": "Twitch yayıncılarının izleyicileri için özel olarak geliştirildi, oyun içi istatistiklerinizi hızlı ve kolay bir şekilde sohbette göndermeye yarar.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ByDexterTR/CreedGPT.git"
+    "url": "git+https://github.com/ByDexterTR/RiotTwitchBot.git"
   },
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "riot",
+    "riottwitch",
+    "riottwitchbot",
+    "twitchbot",
+    "bot",
+    "chat",
+    "chatbot",
+    "riotchatbot",
+    "riottwitchchatbot",
+    "twitchchatbot"
+  ],
+  "author": "ByDexterTR & hsemihaktas",
+  "license": "GPL-3.0",
   "bugs": {
-    "url": "https://github.com/ByDexterTR/CreedGPT/issues"
+    "url": "https://github.com/ByDexterTR/RiotTwitchBot/issues"
   },
-  "homepage": "https://github.com/ByDexterTR/CreedGPT#readme",
+  "homepage": "https://github.com/ByDexterTR/RiotTwitchBot#readme",
   "dependencies": {
-    "axios": "^1.4.0",
+    "axios": "^1.5.1",
+    "fuse.js": "^6.6.2",
     "tmi.js": "^1.8.5"
   }
 }

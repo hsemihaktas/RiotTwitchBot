@@ -1,14 +1,14 @@
 # Riot Twitch Chat Botu
 
 ## Açıklama:
-Node.js axios kütüphanesi ile riot api kullanılarak twitch izleyicilerin oyun içi istatikleri görmesi için geliştirilmiş kendinize ait bir twitch chat botu.
+Twitch yayıncılarının izleyicileri için özel olarak geliştirildi, oyun içi istatistiklerinizi hızlı ve kolay bir şekilde sohbette göndermeye yarar.
 
 ## Komutlar:
 
 ### Genel
 |Komut|Açıklama|
 |-|-|
-|!commands/!help             |Komut listesini gösterir                     
+|!commands/!help|Komut listesini gösterir                     
 
 ### LOL
 |Komut|Açıklama|
@@ -35,19 +35,21 @@ Node.js axios kütüphanesi ile riot api kullanılarak twitch izleyicilerin oyun
 |!tftlastmatch / !tftlastgame|Sihirdarın son maç istatistiğini gösterir
 |!tftavg|Sihirdarın son maçlardaki ortalamasını gösterir
 |!tftitem / !bis Karakter|Şampiyonun yaygın eşya dizilimini gösterir
+|!tftmeta|En Yaygın Kompu gösterir
 
 ## Özelleştirme
-**RIOT_API_KEY** https://developer.riotgames.com/ üzerinden riot api anahtarını oluşturup girmeniz lazım.
+1. **RIOT_API_KEY**: Riot Games Developer Portal üzerinden oluşturmanız gereken bir Riot API anahtarıdır. Bu anahtarı edinmek için [developer.riotgames.com](https://developer.riotgames.com/) adresine gidin. Anahtarınızı aldıktan sonra, bu anahtarı koda eklemelisiniz.
 
-**TFT_SUMMONER_NAME** değişkenini varsayılan olarak ayarlamalısınız, !tftsummoner komutu ile twitch chatinden değiştirebilirsiniz.
-**TFT_REGION** değişkenini varsayılan olarak ayarlamalısınız, !tftregion komutu ile twitch chatinden değiştirebilirsiniz.
+2. **TFT_SUMMONER_NAME**: TFT için sihirdar adını belirtir. Kod üzerinden ayarlanır, ancak Twitch sohbeti üzerinden `!tftsummoner` komutunu kullanarak değiştirebilirler.
 
-**LOL_SUMMONER_NAME** değişkenini varsayılan olarak ayarlamalısınız, !lolsummoner komutu ile twitch chatinden değiştirebilirsiniz.
-**LOL_REGION** değişkenini varsayılan olarak ayarlamalısınız, !lolregion komutu ile twitch chatinden değiştirebilirsiniz.
+3. **TFT_REGION**: TFT için bölgeyi belirtir. Kod üzerinden ayarlanır, ancak Twitch sohbeti üzerinden `!tftregion` komutunu kullanarak değiştirebilirler.
+
+4. **LOL_SUMMONER_NAME**: LOL için sihirdar adını belirtir. Kod üzerinden ayarlanır, ancak Twitch sohbeti üzerinden `!lolsummoner` komutunu kullanarak değiştirebilirler.
+
+5. **LOL_REGION**: LOL için bölgeyi belirtir. Kod üzerinden ayarlanır, ancak Twitch sohbeti üzerinden `!lolregion` komutunu kullanarak değiştirebilirler.
 https://developer.riotgames.com/docs/lol
-> Eğer oynadığınız sunucu europe bölgesinde değil ise kod içerisinden europe apilerini düzeltmelisiniz.
+> Oynadığınız sunucu Avrupa bölgesinde değilse, kodunuzdaki Europe API'lerini ilgili bölgeye uyarlamalısınız.
 
 ## Emeği Geçenler
 [ByDexterTR](https://github.com/ByDexterTR)
-
 [SemiH](https://github.com/hsemihaktas)
