@@ -1,5 +1,6 @@
 const tmi = require('tmi.js');
 const axios = require('axios');
+const Fuse = require('fuse.js');
 
 const RIOT_API_KEY = 'RGAPI-KEY';
 
@@ -55,7 +56,7 @@ client.on('message', async (channel, userstate, message, self) => {
     }
   }
   const commands = [
-    { cmd: '!tftrank', key: 'tftrank', func: FTftrank }, { cmd: '!tftlastmatch,!tftlastgame', key: 'tftlastmatch', func: FTftlastmatch }, { cmd: '!tftavg', key: 'tftavg', func: FTftavg }, { cmd: '!tftitem, !bis', key: 'tftitem', func: FTftitem },
+    { cmd: '!tftrank', key: 'tftrank', func: FTftrank }, { cmd: '!tftlastmatch,!tftlastgame', key: 'tftlastmatch', func: FTftlastmatch }, { cmd: '!tftavg', key: 'tftavg', func: FTftavg }, { cmd: '!tftitem,!bis', key: 'tftitem', func: FTftitem }, { cmd: '!tftmeta', key: 'tftmeta', func: undefined },
     { cmd: '!lolrank', key: 'lolrank', func: FLolrank }, { cmd: '!lollastmatch,!lollastgame', key: 'lollastmatch', func: FLollastmatch }, { cmd: '!runes', key: 'runes', func: FLolrunes }, { cmd: '!matchup', key: 'matchup', func: FLolmatchup }, { cmd: '!winrate,!wr', key: 'winrate', func: FLolwinrate }, { cmd: '!avgrank,!elo', key: 'avgrank', func: FLolavg }, { cmd: '!mostplayed', key: 'mostplayed', func: FLolmostplayed }, { cmd: '!streak', key: 'streak', func: Flolstreak }, { cmd: '!mastery', key: 'mastery', func: FLolmastery }, { cmd: '!levels', key: 'levels', func: FLollevels },
     { cmd: '!commands,!help', key: 'commands', func: undefined }
   ];
@@ -65,7 +66,8 @@ client.on('message', async (channel, userstate, message, self) => {
       if ((TFT_SUMMONER_ID === undefined || TFT_SUMMONER_PUUID === undefined) && (key === 'tftrank' || key === 'tftlastmatch' || key === 'tftavg' || key === 'tftitem')) reply(userstate.id, channel, `TFT sihirdarı ayarlı değil, modlara veya yayıncıya !tftsummoner & !tftregion komutlarıyla ayarlamasını isteyin.`);
       else if ((LOL_SUMMONER_ID === undefined || LOL_SUMMONER_PUUID === undefined) && (key === 'lolrank' || key === 'lollastmatch' || key === 'runes' || key === 'matchup' || key === 'winrate' || key === 'avgrank' || key === 'mostplayed' || key === 'streak' || key === 'mastery' || key === 'levels')) reply(userstate.id, channel, `LOL sihirdarı ayarlı değil, modlara veya yayıncıya !lolsummoner & !lolregion komutlarıyla ayarlamasını isteyin.`);
       else if (key === 'tftitem' && value !== undefined) func(channel, value, userstate.id);
-      else if (key === 'commands') reply(userstate.id, channel, `LOL: !lolrank !lollastmatch !runes !matchup !winrate !avgrank !mostplayed !streak !mastery !levels • TFT: !tftrank !tftlastmatch !tftavg !tftitem Karakter`);
+      else if (key == 'tftmeta') reply(userstate.id, channel, `Mahir 4 • Demacia 3 » Ortalama: 3.2 | WR: 26.1% | İlk 4: 74.1%`);
+      else if (key === 'commands') reply(userstate.id, channel, `LOL: !lolrank !lollastmatch !runes !matchup !winrate !avgrank !mostplayed !streak !mastery !levels • TFT: !tftrank !tftlastmatch !tftavg !tftitem Karakter !tftmeta`);
       else func(channel, userstate.id);
     }
   });
@@ -77,9 +79,9 @@ async function FTftrank(channel, username) {
     const { data } = await axios.get(`https://${TFT_REGION}1.api.riotgames.com/tft/league/v1/entries/by-summoner/${TFT_SUMMONER_ID}?api_key=${RIOT_API_KEY}`);
     if (ranked = data.find((entry) => entry.queueType === 'RANKED_TFT')) {
       const { tier, rank, leaguePoints } = ranked;
-      reply(username, channel, ` ${TFT_SUMMONER_NAME} • ${`${tier} ${rank} (${leaguePoints} LP)`.replace(/(MASTER|GRANDMASTER|CHALLENGER) I/g, '$1').replace(new RegExp(Object.keys(translate).join('|'), 'gi'), (match) => translate[match])}`);
+      reply(username, channel, ` ${TFT_SUMMONER_NAME} » ${`${tier} ${rank} (${leaguePoints} LP)`.replace(/(MASTER|GRANDMASTER|CHALLENGER) I/g, '$1').replace(new RegExp(Object.keys(translate).join('|'), 'gi'), (match) => translate[match])}`);
     } else {
-      reply(username, channel, `${TFT_SUMMONER_NAME} • Derecesiz`);
+      reply(username, channel, `${TFT_SUMMONER_NAME} » Derecesiz`);
     }
   } catch (error) {
     reply(username, channel, `Lig verileri alınamadı veya derecesiz.`);
@@ -93,7 +95,7 @@ async function FTftlastmatch(channel, username) {
     const matchList = await axios.get(`https://europe.api.riotgames.com/tft/match/v1/matches/by-puuid/${TFT_SUMMONER_PUUID}/ids?count=1&api_key=${RIOT_API_KEY}`);
     const matchDetails = await axios.get(`https://europe.api.riotgames.com/tft/match/v1/matches/${matchList.data[0]}?api_key=${RIOT_API_KEY}`);
     const myParticipant = matchDetails.data.info.participants.find(participant => participant.puuid === TFT_SUMMONER_PUUID);
-    reply(username, channel, `${TFT_SUMMONER_NAME} • ${myParticipant.placement}. sıra • ${myParticipant.level}. seviye`);
+    reply(username, channel, `${TFT_SUMMONER_NAME} » ${myParticipant.placement}. sıra | ${myParticipant.level}. seviye`);
   } catch (error) {
     reply(username, channel, `Maç geçmişi alınamadı.`);
     console.error('Hata oluştu:', error.response ? error.response.data : error.message);
@@ -109,7 +111,7 @@ async function FTftavg(channel, username) {
       const matchDetails = await axios.get(`https://europe.api.riotgames.com/tft/match/v1/matches/${matchId}?api_key=${RIOT_API_KEY}`);
       totalPlacement += matchDetails.data.info.participants.find(participant => participant.puuid === TFT_SUMMONER_PUUID)?.placement;
     }
-    reply(username, channel, `${TFT_SUMMONER_NAME} • ${data.length} maç • Ortalama ${Math.floor(totalPlacement / data.length * 10) / 10}`);
+    reply(username, channel, `${TFT_SUMMONER_NAME} » ${data.length} maç | Ortalama ${Math.floor(totalPlacement / data.length * 10) / 10}`);
   } catch (error) {
     reply(username, channel, `Maç geçmişi alınamadı.`);
     console.error('Hata oluştu:', error.response ? error.response.data : error.message);
@@ -120,8 +122,10 @@ async function FTftavg(channel, username) {
 async function FTftitem(channel, message, username) {
   try {
     const data = await (await fetch('https://raw.githubusercontent.com/ByDexterTR/RiotTwitchBot/main/node_modules/champions_data.json')).json();
-    const character = data.find((champion) => champion.name.toLowerCase() === message.toLowerCase());
-    reply(username, channel, character ? `${character.name} • ${character.items.join(' - ')}` : `Karakter bulunamadı: ${message}`);
+    const fuse = new Fuse(data, { shouldSort: true, ignoreCase: true, keys: ['name'], });
+    const results = fuse.search(message);
+    const character = results.length > 0 ? results[0].item : undefined;
+    reply(username, channel, character ? `(Set 9.5) ${character.name} » ${character.items.join(', ')}` : `Karakter bulunamadı.`);
   } catch (error) {
     reply(username, channel, `Eşya dizilimleri alınamadı.`);
     console.error('Hata oluştu:', error.response ? error.response.data : error.message);
@@ -134,9 +138,9 @@ async function FLolrank(channel, username) {
     const { data } = await axios.get(`https://${LOL_REGION}1.api.riotgames.com/lol/league/v4/entries/by-summoner/${LOL_SUMMONER_ID}?api_key=${RIOT_API_KEY}`);
     if (ranked = data.find((entry) => entry.queueType === 'RANKED_SOLO_5x5')) {
       const { tier, rank, leaguePoints } = ranked;
-      reply(username, channel, ` ${LOL_SUMMONER_NAME} • ${`${tier} ${rank} (${leaguePoints} LP)`.replace(/(MASTER|GRANDMASTER|CHALLENGER) I/g, '$1').replace(new RegExp(Object.keys(translate).join('|'), 'gi'), (match) => translate[match])}`);
+      reply(username, channel, ` ${LOL_SUMMONER_NAME} » ${`${tier} ${rank} (${leaguePoints} LP)`.replace(/(MASTER|GRANDMASTER|CHALLENGER) I/g, '$1').replace(new RegExp(Object.keys(translate).join('|'), 'gi'), (match) => translate[match])}`);
     } else {
-      reply(username, channel, `${LOL_SUMMONER_NAME} • Derecesiz`);
+      reply(username, channel, `${LOL_SUMMONER_NAME} » Derecesiz`);
     }
   } catch (error) {
     reply(username, channel, `Lig verileri alınamadı veya derecesiz.`);
@@ -150,7 +154,7 @@ async function FLollastmatch(channel, username) {
     const matchList = await axios.get(`https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/${LOL_SUMMONER_PUUID}/ids?api_key=${RIOT_API_KEY}`);
     const matchDetails = await axios.get(`https://europe.api.riotgames.com/lol/match/v5/matches/${matchList.data[0]}?api_key=${RIOT_API_KEY}`);
     const myParticipant = matchDetails.data.info.participants.find(participant => participant.puuid === LOL_SUMMONER_PUUID);
-    reply(username, channel, `${myParticipant.summonerName} • ${myParticipant.championName} (${myParticipant.kills}/${myParticipant.deaths}/${myParticipant.assists}) • ${myParticipant.win ? 'Zafer' : 'Bozgun'}`)
+    reply(username, channel, `${myParticipant.summonerName} » ${myParticipant.championName} (${myParticipant.kills}/${myParticipant.deaths}/${myParticipant.assists}) | ${myParticipant.win ? 'Zafer' : 'Bozgun'}`)
   } catch (error) {
     reply(username, channel, `Maç geçmişi alınamadı.`);
     console.error('Hata oluştu:', error.response ? error.response.data : error.message);
@@ -174,7 +178,7 @@ async function FLolrunes(channel, username) {
       }
       return 'Bilinmeyen Rün';
     });
-    reply(username, channel, `${await getChampionName(player.championId)} • ${perkNames.slice(0, 4).join(', ')} • ${perkNames.slice(4).join(', ')}`);
+    reply(username, channel, `${await getChampionName(player.championId)} » ${perkNames.slice(0, 4).join(', ')} | ${perkNames.slice(4).join(', ')}`);
   } catch (error) {
     reply(username, channel, `Rün verileri alınamadı veya oyuncu maçta değil.`);
     console.error('Hata oluştu:', error.response ? error.response.data : error.message);
@@ -207,9 +211,9 @@ async function FLolwinrate(channel, username) {
     if (ranked = data.find((entry) => entry.queueType === 'RANKED_SOLO_5x5')) {
       const { wins, losses } = ranked;
       const winRate = (wins / (wins + losses)) * 100;
-      reply(username, channel, `${LOL_SUMMONER_NAME} • SoloQ: ${wins}W ${losses}L ${winRate.toFixed(2)}%`);
+      reply(username, channel, `${LOL_SUMMONER_NAME} » SoloQ: ${wins}W ${losses}L ${winRate.toFixed(2)}%`);
     } else {
-      reply(username, channel, `${LOL_SUMMONER_NAME} • SoloQ maç geçmişi bulunamadı.`);
+      reply(username, channel, `${LOL_SUMMONER_NAME} » SoloQ maç geçmişi bulunamadı.`);
     }
   } catch (error) {
     reply(username, channel, `Maç geçmişi alınamadı.`);
@@ -234,7 +238,7 @@ async function FLolavg(channel, username) {
       }
     }
     let averageRankName = Object.keys(ranks).find(rank => ranks[rank] === Math.round(totalRankValue / totalPlayers)) || 'Bilinmeyen Rank';
-    reply(username, channel, `Lig ortalaması • ${averageRankName.replace(/(MASTER|GRANDMASTER|CHALLENGER) I/g, '$1').replace(new RegExp(Object.keys(translate).join('|'), 'gi'), (match) => translate[match])}`);
+    reply(username, channel, `Lig ortalaması » ${averageRankName.replace(/(MASTER|GRANDMASTER|CHALLENGER) I/g, '$1').replace(new RegExp(Object.keys(translate).join('|'), 'gi'), (match) => translate[match])}`);
   } catch (error) {
     reply(username, channel, `Lig verileri alınamadı veya oyuncu maçta değil.`);
     console.error('Hata oluştu:', error.response ? error.response.data : error.message);
@@ -245,7 +249,7 @@ async function FLolavg(channel, username) {
 async function FLolmostplayed(channel, username) {
   try {
     const { data: [{ championId, championPoints }] } = await axios.get(`https://${LOL_REGION}1.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-summoner/${LOL_SUMMONER_ID}?api_key=${RIOT_API_KEY}`);
-    reply(username, channel, `${LOL_SUMMONER_NAME} • ${await getChampionName(championId)} (${formatMasteryPoints(championPoints)})`);
+    reply(username, channel, `${LOL_SUMMONER_NAME} » ${await getChampionName(championId)} (${formatMasteryPoints(championPoints)})`);
   } catch (error) {
     reply(username, channel, `Şampiyon verileri alınamadı.`);
     console.error('Hata oluştu:', error.response ? error.response.data : error.message);
@@ -265,7 +269,7 @@ async function Flolstreak(channel, username) {
         break;
       }
     }
-    reply(username, channel, consecutiveWins === 0 ? `${LOL_SUMMONER_NAME} • Yenilmezlik serisi bulunamadı.` : `@${username}, ${LOL_SUMMONER_NAME} • ${consecutiveWins} maçtır yenilmiyor.`);
+    reply(username, channel, consecutiveWins === 0 ? `${LOL_SUMMONER_NAME} » Yenilmezlik serisi bulunamadı.` : `${LOL_SUMMONER_NAME} » ${consecutiveWins} maçtır yenilmiyor.`);
   } catch (error) {
     reply(username, channel, `Maç geçmişi alınamadı.`);
     console.error('Hata oluştu:', error.response ? error.response.data : error.message);
@@ -285,7 +289,7 @@ async function FLolmastery(channel, username) {
       teamMessages[participant.teamId] = teamMessages[participant.teamId] || [];
       teamMessages[participant.teamId].push(`${await getChampionName(championId)} ${championMastery ? formatMasteryPoints(championMastery.championPoints) : 0}`);
     }
-    const message = Object.values(teamMessages).map(team => team.join(', ')).join(' • ');
+    const message = Object.values(teamMessages).map(team => team.join(', ')).join(' ∨S ');
     reply(username, channel, message);
   } catch (error) {
     reply(username, channel, `Ustalık puanları alınamadı veya oyuncu maçta değil.`);
@@ -306,7 +310,7 @@ async function FLollevels(channel, username) {
       teamMessages[participant.teamId] = teamMessages[participant.teamId] || [];
       teamMessages[participant.teamId].push(`${await getChampionName(championId)} ${summonerLevel}Lv`);
     }
-    const message = Object.values(teamMessages).map(team => team.join(', ')).join(' • ');
+    const message = Object.values(teamMessages).map(team => team.join(', ')).join(' ∨S ');
     reply(username, channel, message);
   } catch (error) {
     reply(username, channel, `Seviyeler alınamadı veya oyuncu maçta değil.`);
@@ -329,7 +333,7 @@ async function Precache(game, username, channel) {
       else console.log(`TFT sihirdarı ayarlandı, ${TFT_SUMMONER_NAME}(${TFT_REGION})`);
     } catch (error) {
       if (username !== undefined) reply(username, channel, `${TFT_SUMMONER_NAME}(${TFT_REGION}) sihirdarı bulunamadı, !tftregion & !tftsummoner ile ayarlayın.`);
-      else console.log(`${LOL_SUMMONERTFT_SUMMONER_NAME_NAME}(${TFT_REGION}) sihirdarı bulunamadı, !tftregion & !tftsummoner ile ayarlayın.`);
+      else console.log(`${TFT_SUMMONER_NAME}(${TFT_REGION}) sihirdarı bulunamadı, !tftregion & !tftsummoner ile ayarlayın.`);
       console.error('Hata oluştu:', error.response ? error.response.data : error.message);
       TFT_SUMMONER_ID = undefined;
       TFT_SUMMONER_PUUID = undefined;
