@@ -1,0 +1,474 @@
+[
+  {
+    "name": "Aatrox",
+    "items": [
+      "Bloodthirster",
+      "Sterak's Gage",
+      "Titan's Resolve"
+    ]
+  },
+  {
+    "name": "Ahri",
+    "items": [
+      "Blue Buff",
+      "Giant Slayer",
+      "Jeweled Gauntlet"
+    ]
+  },
+  {
+    "name": "Aphelios",
+    "items": [
+      "Giant Slayer",
+      "Guinsoo's Rageblade",
+      "Infinity Edge"
+    ]
+  },
+  {
+    "name": "Ashe",
+    "items": [
+      "Deathblade",
+      "Giant Slayer",
+      "Last Whisper"
+    ]
+  },
+  {
+    "name": "Azir",
+    "items": [
+      "Guinsoo's Rageblade",
+      "Jeweled Gauntlet",
+      "Nashor's Tooth"
+    ]
+  },
+  {
+    "name": "Belveth",
+    "items": [
+      "Bloodthirster",
+      "Rapid Firecannon",
+      "Titan's Resolve"
+    ]
+  },
+  {
+    "name": "Cassiopeia",
+    "items": [
+      "Blue Buff",
+      "Giant Slayer",
+      "Jeweled Gauntlet"
+    ]
+  },
+  {
+    "name": "Chogath",
+    "items": [
+      "Bramble Vest",
+      "Dragon's Claw",
+      "Redemption"
+    ]
+  },
+  {
+    "name": "Darius",
+    "items": [
+      "Bloodthirster",
+      "Sterak's Gage",
+      "Titan's Resolve"
+    ]
+  },
+  {
+    "name": "Ekko",
+    "items": [
+      "Hand Of Justice",
+      "Hand Of Justice",
+      "Jeweled Gauntlet"
+    ]
+  },
+  {
+    "name": "Fiora",
+    "items": [
+      "Bloodthirster",
+      "Sterak's Gage",
+      "Titan's Resolve"
+    ]
+  },
+  {
+    "name": "Galio",
+    "items": [
+      "Dragon's Claw",
+      "Gargoyle Stoneplate",
+      "Ionic Spark"
+    ]
+  },
+  {
+    "name": "Gangplank",
+    "items": [
+      "Giant Slayer",
+      "Jeweled Gauntlet",
+      "Spear of Shojin"
+    ]
+  },
+  {
+    "name": "Graves",
+    "items": [
+      "Bloodthirster",
+      "Sterak's Gage",
+      "Titan's Resolve"
+    ]
+  },
+  {
+    "name": "Heimerdinger",
+    "items": [
+      "Guinsoo's Rageblade",
+      "Spear of Shojin",
+      "Statikk Shiv"
+    ]
+  },
+  {
+    "name": "Illaoi",
+    "items": [
+      "Redemption",
+      "Sunfire Cape",
+      "Warmog's Armor"
+    ]
+  },
+  {
+    "name": "Irelia",
+    "items": [
+      "Redemption",
+      "Sunfire Cape",
+      "Warmog's Armor"
+    ]
+  },
+  {
+    "name": "Jarvan IV",
+    "items": [
+      "Redemption",
+      "Sunfire Cape",
+      "Warmog's Armor"
+    ]
+  },
+  {
+    "name": "Jayce",
+    "items": [
+      "Giant Slayer",
+      "Infinity Edge",
+      "Last Whisper"
+    ]
+  },
+  {
+    "name": "Jhin",
+    "items": [
+      "Guinsoo's Rageblade",
+      "Last Whisper",
+      "Infinity Edge"
+    ]
+  },
+  {
+    "name": "Jinx",
+    "items": [
+      "Guinsoo's Rageblade",
+      "Infinity Edge",
+      "Runaan's Hurricane"
+    ]
+  },
+  {
+    "name": "KSante",
+    "items": [
+      "Redemption",
+      "Sunfire Cape",
+      "Warmog's Armor"
+    ]
+  },
+  {
+    "name": "Kaisa",
+    "items": [
+      "Guardbreaker",
+      "Jeweled Gauntlet",
+      "Spear of Shojin"
+    ]
+  },
+  {
+    "name": "Karma",
+    "items": [
+      "Giant Slayer",
+      "Hextech Gunblade",
+      "Jeweled Gauntlet"
+    ]
+  },
+  {
+    "name": "Kassadin",
+    "items": [
+      "Ionic Spark",
+      "Sunfire Cape",
+      "Warmog's Armor"
+    ]
+  },
+  {
+    "name": "Katarina",
+    "items": [
+      "Hand Of Justice",
+      "Ionic Spark",
+      "Jeweled Gauntlet"
+    ]
+  },
+  {
+    "name": "Kayle",
+    "items": [
+      "Guinsoo's Rageblade",
+      "Guinsoo's Rageblade",
+      "Hextech Gunblade"
+    ]
+  },
+  {
+    "name": "Malzahar",
+    "items": [
+      "Blue Buff",
+      "Giant Slayer",
+      "Jeweled Gauntlet"
+    ]
+  },
+  {
+    "name": "Milio",
+    "items": [
+      "Blue Buff",
+      "Giant Slayer",
+      "Jeweled Gauntlet"
+    ]
+  },
+  {
+    "name": "Miss Fortune",
+    "items": [
+      "Blue Buff",
+      "Giant Slayer",
+      "Jeweled Gauntlet"
+    ]
+  },
+  {
+    "name": "Mordekaiser",
+    "items": [
+      "Guinsoo's Rageblade",
+      "Rapid Firecannon",
+      "Rapid Firecannon"
+    ]
+  },
+  {
+    "name": "Naafiri",
+    "items": [
+      "Bloodthirster",
+      "Sterak's Gage",
+      "Titan's Resolve"
+    ]
+  },
+  {
+    "name": "Nasus",
+    "items": [
+      "Bloodthirster",
+      "Gargoyle Stoneplate",
+      "Warmog's Armor"
+    ]
+  },
+  {
+    "name": "Nautilus",
+    "items": [
+      "Redemption",
+      "Sunfire Cape",
+      "Warmog's Armor"
+    ]
+  },
+  {
+    "name": "Neeko",
+    "items": [
+      "Archangel's Staff",
+      "Bloodthirster",
+      "Titan's Resolve"
+    ]
+  },
+  {
+    "name": "Nilah",
+    "items": [
+      "Giant Slayer",
+      "Rapid Firecannon",
+      "Rapid Firecannon"
+    ]
+  },
+  {
+    "name": "Orianna",
+    "items": [
+      "Giant Slayer",
+      "Jeweled Gauntlet",
+      "Spear of Shojin"
+    ]
+  },
+  {
+    "name": "Poppy",
+    "items": [
+      "Redemption",
+      "Sunfire Cape",
+      "Warmog's Armor"
+    ]
+  },
+  {
+    "name": "Qiyana",
+    "items": [
+      "Bloodthirster",
+      "Sterak's Gage",
+      "Titan's Resolve"
+    ]
+  },
+  {
+    "name": "Quinn",
+    "items": [
+      "Giant Slayer",
+      "Infinity Edge",
+      "Last Whisper"
+    ]
+  },
+  {
+    "name": "RekSai",
+    "items": [
+      "Bloodthirster",
+      "Sterak's Gage",
+      "Titan's Resolve"
+    ]
+  },
+  {
+    "name": "Renekton",
+    "items": [
+      "Redemption",
+      "Sunfire Cape",
+      "Warmog's Armor"
+    ]
+  },
+  {
+    "name": "Ryze",
+    "items": [
+      "Giant Slayer",
+      "Jeweled Gauntlet",
+      "Spear of Shojin"
+    ]
+  },
+  {
+    "name": "Samira",
+    "items": [
+      "Blue Buff",
+      "Giant Slayer",
+      "Infinity Edge"
+    ]
+  },
+  {
+    "name": "Sejuani",
+    "items": [
+      "Redemption",
+      "Sunfire Cape",
+      "Warmog's Armor"
+    ]
+  },
+  {
+    "name": "Sett",
+    "items": [
+      "Redemption",
+      "Sunfire Cape",
+      "Warmog's Armor"
+    ]
+  },
+  {
+    "name": "Shen",
+    "items": [
+      "Redemption",
+      "Sunfire Cape",
+      "Warmog's Armor"
+    ]
+  },
+  {
+    "name": "Silco",
+    "items": [
+      "Blue Buff",
+      "Jeweled Gauntlet",
+      "Morellonomicon"
+    ]
+  },
+  {
+    "name": "Sion",
+    "items": [
+      "Redemption",
+      "Sunfire Cape",
+      "Warmog's Armor"
+    ]
+  },
+  {
+    "name": "Sona",
+    "items": [
+      "Morellonomicon",
+      "Spear of Shojin",
+      "Statikk Shiv"
+    ]
+  },
+  {
+    "name": "Soraka",
+    "items": [
+      "Archangel's Staff",
+      "Jeweled Gauntlet",
+      "Spear of Shojin"
+    ]
+  },
+  {
+    "name": "Swain",
+    "items": [
+      "Ionic Spark",
+      "Sunfire Cape",
+      "Warmog's Armor"
+    ]
+  },
+  {
+    "name": "Taliyah",
+    "items": [
+      "Blue Buff",
+      "Giant Slayer",
+      "Jeweled Gauntlet"
+    ]
+  },
+  {
+    "name": "Taric",
+    "items": [
+      "Redemption",
+      "Sunfire Cape",
+      "Warmog's Armor"
+    ]
+  },
+  {
+    "name": "Twisted Fate",
+    "items": [
+      "Blue Buff",
+      "Hextech Gunblade",
+      "Jeweled Gauntlet"
+    ]
+  },
+  {
+    "name": "Velkoz",
+    "items": [
+      "Blue Buff",
+      "Hextech Gunblade",
+      "Jeweled Gauntlet"
+    ]
+  },
+  {
+    "name": "Vi",
+    "items": [
+      "Redemption",
+      "Sunfire Cape",
+      "Warmog's Armor"
+    ]
+  },
+  {
+    "name": "Warwick",
+    "items": [
+      "Bloodthirster",
+      "Guinsoo's Rageblade",
+      "Quicksilver"
+    ]
+  },
+  {
+    "name": "Xayah",
+    "items": [
+      "Deathblade",
+      "Giant Slayer",
+      "Last Whisper"
+    ]
+  }
+]
