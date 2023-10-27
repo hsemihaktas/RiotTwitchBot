@@ -1,7 +1,7 @@
 {
   "name": "riottwitchbot",
-  "version": "1.4.6",
-  "description": "Twitch yayıncılarının izleyicileri için özel olarak geliştirildi, oyun içi istatistiklerinizi hızlı ve kolay bir şekilde sohbette göndermeye yarar.",
+  "version": "1.4.7",
+  "description": "Developed specifically for viewers of Twitch streamers, it allows you to send your in-game stats quickly and easily in chat. | Twitch yayıncılarının izleyicileri için özel olarak geliştirilen bu özellik, oyun içi istatistiklerinizi sohbette hızlı ve kolay bir şekilde göndermenizi sağlar.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -30,6 +30,7 @@
   "homepage": "https://github.com/ByDexterTR/RiotTwitchBot#readme",
   "dependencies": {
     "axios": "^1.5.1",
+    "fs": "^0.0.1-security",
     "fuse.js": "^6.6.2",
     "tmi.js": "^1.8.5"
   }

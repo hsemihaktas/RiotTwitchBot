@@ -1,4 +1,46 @@
-# Riot Twitch Chat Botu
+# EN
+
+## Description:
+
+Developed specifically for viewers of Twitch streamers, it allows you to send your in-game stats quickly and easily in chat.
+
+## Commands:
+
+### General:
+|Command|Description|
+|-|-|
+|!commands/!help|Shows the command list
+
+### LOL
+|Command|Description|
+|-|-|
+|!lolrank|Shows the Summoner's rank
+|!lollastmatch / !lollastgame|Shows the Summoner's last match statistics
+|!runes|Show the Summoner's runes (LIVE GAME)
+|!matchup|Shows the Summoners rank (LIVE GAME)
+|!winrate / !wr|Shows the Summoners Solo/Duo winrate
+|!avgrank / !elo|Shows the rank average of Summoners (LIVE GAME)
+|!mostplayed|Shows the Summoner's most played champion
+|!streak|Shows how many match the Summoner's is undefeated
+|!mastery|Shows the Summoners champion mastery (LIVE GAME)
+|!levels|Shows the Summoners level (LIVE GAME)
+
+### TFT
+|Command|Description|
+|-|-|
+|!tftrank|Shows the Summoner's rank
+|!tftlastmatch / !tftlastgame|Shows the Summoner's last match statistics
+|!tftavg|Shows Summoner's average stats in recent matches
+|!tftitem / !bis Garen|Shows the champion's common item build
+
+### MOD
+|Command|Description|
+|-|-|
+|!setsummoner ByDexter|Summoner name for executing commands
+|!setregion tr1|Region for executing commands
+|!setlang en/tr|Setting the language of the Bot
+
+# TR
 
 ## Açıklama:
 Twitch yayıncılarının izleyicileri için özel olarak geliştirildi, oyun içi istatistiklerinizi hızlı ve kolay bir şekilde sohbette göndermeye yarar.
@@ -13,43 +55,30 @@ Twitch yayıncılarının izleyicileri için özel olarak geliştirildi, oyun i�
 ### LOL
 |Komut|Açıklama|
 |-|-|
-|!lolsummoner Name|İstatiklerin çekileceği hesap ismi
-|!lolregion TR|İstatiklerin çekileceği bölge
 |!lolrank|Sihirdarın ligini gösterir
 |!lollastmatch / !lollastgame|Sihirdarın son maç istatistiğini gösterir
-|!runes|Sihirdarın rünleri gösterir
-|!matchup|Sihirdarların liglerini gösterir
-|!winrate / !wr|Sihirdarın SoloQ kazanma oranını gösterir
-|!avgrank / !elo|Sihirdarların lig ortalamasını gösterir
-|!mostplayed|Sihirdarın favori şampiyonunu gösterir
+|!runes|Sihirdarın rününü gösterir (LIVE GAME)
+|!matchup|Sihirdarların liglerini gösterir (LIVE GAME)
+|!winrate / !wr|Sihirdarın Tek/Çift kazanma oranını gösterir
+|!avgrank / !elo|Sihirdarların lig ortalamasını gösterir (LIVE GAME)
+|!mostplayed|Sihirdar'ın en fazla oynadığı şampiyonu gösterir
 |!streak|Sihirdarın kaç maçtır yenilmediğini gösterir
-|!mastery|Sihirdarların şampiyon ustalıklarını gösterir 
-|!levels|Sihirdarların seviyelerini gösterir  
+|!mastery|Sihirdarların şampiyon ustalığını gösterir (LIVE GAME)
+|!levels|Sihirdarların seviyesini gösterir (LIVE GAME)
 
 ### TFT
 |Komut|Açıklama|
 |-|-|
-|!tftsummoner Name|İstatiklerin çekileceği hesap ismi
-|!tftregion TR|İstatiklerin çekileceği bölge
 |!tftrank|Sihirdarın ligini gösterir
 |!tftlastmatch / !tftlastgame|Sihirdarın son maç istatistiğini gösterir
 |!tftavg|Sihirdarın son maçlardaki ortalamasını gösterir
-|!tftitem / !bis Karakter|Şampiyonun yaygın eşya dizilimini gösterir
-|!tftmeta|En Yaygın Kompu gösterir
+|!tftitem / !bis Garen|Şampiyonun yaygın eşya dizilimini gösterir
 
-## Özelleştirme
-1. **RIOT_API_KEY**: Riot Games Developer Portal üzerinden oluşturmanız gereken bir Riot API anahtarıdır. Bu anahtarı edinmek için [developer.riotgames.com](https://developer.riotgames.com/) adresine gidin. Anahtarınızı aldıktan sonra, bu anahtarı koda eklemelisiniz.
+### MOD
+|Komut|Açıklama|
+|-|-|
+|!setsummoner ByDexter|Komutları yürütmek için sihirdar adı
+|!setregion tr1|Komutları yürütmek için bölge
+|!setlang en/tr|Botun dilini ayarlama
 
-2. **TFT_SUMMONER_NAME**: TFT için sihirdar adını belirtir. Kod üzerinden ayarlanır, ancak Twitch sohbeti üzerinden `!tftsummoner` komutunu kullanarak değiştirebilirler.
-
-3. **TFT_REGION**: TFT için bölgeyi belirtir. Kod üzerinden ayarlanır, ancak Twitch sohbeti üzerinden `!tftregion` komutunu kullanarak değiştirebilirler.
-
-4. **LOL_SUMMONER_NAME**: LOL için sihirdar adını belirtir. Kod üzerinden ayarlanır, ancak Twitch sohbeti üzerinden `!lolsummoner` komutunu kullanarak değiştirebilirler.
-
-5. **LOL_REGION**: LOL için bölgeyi belirtir. Kod üzerinden ayarlanır, ancak Twitch sohbeti üzerinden `!lolregion` komutunu kullanarak değiştirebilirler.
-https://developer.riotgames.com/docs/lol
-> Oynadığınız sunucu Avrupa bölgesinde değilse, kodunuzdaki Europe API'lerini ilgili bölgeye uyarlamalısınız.
-
-## Emeği Geçenler
-[ByDexterTR](https://github.com/ByDexterTR)
-[SemiH](https://github.com/hsemihaktas)
+[ByDexterTR](https://github.com/ByDexterTR) | [SemiH](https://github.com/hsemihaktas)
