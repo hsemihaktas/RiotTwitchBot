@@ -4,26 +4,14 @@ const axios = require('axios');
 const Fuse = require('fuse.js');
 const config = JSON.parse(fs.readFileSync('config.json', 'utf8'));
 
-let LANG;
-
-let APIKEY;
-
-let NAME;
-let ID;
-let PUUID;
-
-let REGION;
-let ROUTING;
-
-let lastcommand;
-let boolen = false;
+const APIKEY = config.apikey;
 
 const opts = {
   identity: {
     username: 'BOT NAME',
     password: 'oauth:TOKEN',
   },
-  channels: ['CHANNEL NAME'],
+  channels: ['CHANNEL NAME', 'OTHER CHANNEL(OPTIONAL)',],
 };
 
 const client = new tmi.client(opts);
@@ -31,13 +19,30 @@ const client = new tmi.client(opts);
 client.connect();
 
 client.on('connected', async (address, port) => {
-  LANG = await config['lang'];
-  console.log(config[LANG]['twitch'].replace('{0}', address).replace('{1}', port));
-  Cache(undefined, undefined);
+  console.log(`${address}:${port}`);
 });
 
 client.on('message', async (channel, userstate, message, self) => {
-  if (self || boolen || !message.startsWith('!')) return;
+  if (self || !message.startsWith('!')) return;
+  const lastcommand = await config[channel]['lastcommand'];
+  const LANG = await config[channel]['lang'];
+  const REGION = await config[channel]['region'];
+  const ROUTING = await config[channel]['routing'];
+  let NAME = await config[channel]['summoner'];
+  let ID;
+  let PUUID;
+  try {
+    const response = await axios.get(`https://${REGION}.api.riotgames.com/lol/summoner/v4/summoners/by-name/${NAME}?api_key=${APIKEY}`);
+    NAME = response.data.name;
+    ID = response.data.id;
+    PUUID = response.data.puuid;
+  } catch (error) {
+    ID = undefined;
+    PUUID = undefined;
+    console.error('ERROR:', error.response ? error.response.data : error.message);
+    reply(userstate.id, channel, config[LANG]['Cache_Error'].replace('{0}', NAME).replace('{1}', REGION));
+    return;
+  }
   const spaceIndex = message.indexOf(' ');
   const command = spaceIndex !== -1 ? message.substring(0, spaceIndex) : message;
   const value = spaceIndex !== -1 ? message.substring(spaceIndex + 1) : '';
@@ -66,9 +71,8 @@ client.on('message', async (channel, userstate, message, self) => {
     { cmd: '!setsummoner', key: 'setsummoner', func: undefined, active: undefined },
     { cmd: '!setlang', key: 'setlang', func: undefined, active: undefined }
   ];
-  commands.forEach(({ cmd, key, func, active }) => {
+  commands.forEach(async ({ cmd, key, func, active }) => {
     if (lastcommand !== key && cmd.split(',').includes(command)) {
-      SetDelay(key);
       if (active === undefined) {
         if (userstate.badges && (userstate.badges.moderator || userstate.badges.broadcaster)) {
           if (key === 'setregion') {
@@ -76,33 +80,46 @@ client.on('message', async (channel, userstate, message, self) => {
             const fuse = new Fuse(data, { shouldSort: true, ignoreCase: true, keys: ['name'], });
             const results = fuse.search(value);
             const region = results.length > 0 ? results[0].item : 'euw1';
-            config.riot.region = region;
-            if (region === 'na1' || region === 'br1' || region === 'la1' || region === 'la2') config.riot.routing = 'americas';
-            else if (region === 'jp1' || region === 'kr') config.riot.routing = 'asia';
-            else if (region === 'eun1' || region === 'euw1' || region === 'tr1' || region === 'ru') config.riot.routing = 'europe';
-            else if (region === 'oc1' || region === 'ph2' || region === 'sg2' || region === 'th2' || region === 'tw2' || region === 'vn2') config.riot.routing = 'sea';
+            config[channel].region = region;
+            if (region === 'na1' || region === 'br1' || region === 'la1' || region === 'la2') config[channel].routing = 'americas';
+            else if (region === 'jp1' || region === 'kr') config[channel].routing = 'asia';
+            else if (region === 'eun1' || region === 'euw1' || region === 'tr1' || region === 'ru') config[channel].routing = 'europe';
+            else if (region === 'oc1' || region === 'ph2' || region === 'sg2' || region === 'th2' || region === 'tw2' || region === 'vn2') config[channel].routing = 'sea';
           } else if (key === 'setlang') {
             const data = ['tr', 'en'];
             const fuse = new Fuse(data, { shouldSort: true, ignoreCase: true, keys: ['name'], });
             const results = fuse.search(value);
             const language = results.length > 0 ? results[0].item : 'en';
-            config.lang = language;
+            config[channel].lang = language;
           }
-          else if (key === 'setsummoner') config.riot.summoner = value;
+          else if (key === 'setsummoner') config[channel].summoner = value;
           fs.writeFileSync('config.json', JSON.stringify(config, null, 2), 'utf8');
-          Cache(userstate.id, channel);
-          SetDelay(undefined);
+          try {
+            const response = await axios.get(`https://${config[channel].region}.api.riotgames.com/lol/summoner/v4/summoners/by-name/${config[channel].summoner}?api_key=${APIKEY}`);
+            config[channel].summoner = response.data.name;
+            reply(userstate.id, channel, config[LANG]['Cache_Main'].replace('{0}', response.data.name).replace('{1}', config[channel].region).replace('{2}', config[LANG]['tag']));
+            fs.writeFileSync('config.json', JSON.stringify(config, null, 2), 'utf8');
+          } catch (error) {
+            console.error('ERROR:', error.response ? error.response.data : error.message);
+            reply(userstate.id, channel, config[LANG]['Cache_Error'].replace('{0}', NAME).replace('{1}', REGION));
+          }
         }
         else reply(userstate.id, channel, config[LANG]['onlyadmin']);
       } else if (active === true) {
+        config[channel].lastcommand = key;
+        fs.writeFileSync('config.json', JSON.stringify(config, null, 2), 'utf8');
+        setTimeout(() => { if (config[channel].lastcommand === key) { config[channel].lastcommand = ' '; fs.writeFileSync('config.json', JSON.stringify(config, null, 2), 'utf8'); }; }, 2000);
         if (NAME === undefined || ID === undefined || PUUID === undefined) { reply(userstate.id, channel, config[LANG]['Cache_Error'].replace('{0}', NAME).replace('{1}', REGION)); return; }
         if (live === false) reply(userstate.id, channel, config[LANG]['live_error']);
         else func(channel, userstate.id);
       } else {
+        config[channel].lastcommand = key;
+        fs.writeFileSync('config.json', JSON.stringify(config, null, 2), 'utf8');
+        setTimeout(() => { if (config[channel].lastcommand === key) { config[channel].lastcommand = ' '; fs.writeFileSync('config.json', JSON.stringify(config, null, 2), 'utf8'); }; }, 2000);
         if (NAME === undefined || ID === undefined || PUUID === undefined) { reply(userstate.id, channel, config[LANG]['Cache_Error'].replace('{0}', NAME).replace('{1}', REGION)); return; }
         if (key === 'commands') reply(userstate.id, channel, `LOL: !lolrank !lollastmatch !runes !matchup !wr !elo !mostplayed !streak !mastery !levels - TFT: !tftrank !tftlastmatch !tftavg !tftitem CHAMP - MOD: !setlang !setregion !setsummoner`);
         else if (key === 'tftitem' && value !== undefined) func(channel, value, userstate.id);
-        else func(channel, userstate.id);
+        else func(channel, userstate.id, NAME, ID, PUUID, REGION, ROUTING, LANG);
       }
     }
   });
@@ -110,7 +127,7 @@ client.on('message', async (channel, userstate, message, self) => {
 
 //
 
-async function FTftrank(channel, username) {
+async function FTftrank(channel, username, NAME, ID, PUUID, REGION, ROUTING, LANG) {
   try {
     const { data } = await axios.get(`https://${REGION}.api.riotgames.com/tft/league/v1/entries/by-summoner/${ID}?api_key=${APIKEY}`);
     if (ranked = data.find((entry) => entry.queueType === 'RANKED_TFT')) {
@@ -126,7 +143,7 @@ async function FTftrank(channel, username) {
   }
 }
 
-async function FTftlastmatch(channel, username) {
+async function FTftlastmatch(channel, username, NAME, ID, PUUID, REGION, ROUTING) {
   try {
     const matchList = await axios.get(`https://${ROUTING}.api.riotgames.com/tft/match/v1/matches/by-puuid/${PUUID}/ids?count=1&api_key=${APIKEY}`);
     const matchDetails = await axios.get(`https://${ROUTING}.api.riotgames.com/tft/match/v1/matches/${matchList.data[0]}?api_key=${APIKEY}`);
@@ -138,7 +155,7 @@ async function FTftlastmatch(channel, username) {
   }
 }
 
-async function FTftavg(channel, username) {
+async function FTftavg(channel, username, NAME, ID, PUUID, REGION, ROUTING, LANG) {
   try {
     const { data } = await axios.get(`https://${ROUTING}.api.riotgames.com/tft/match/v1/matches/by-puuid/${PUUID}/ids?api_key=${APIKEY}`);
     let totalPlacement = 0;
@@ -153,7 +170,7 @@ async function FTftavg(channel, username) {
   }
 }
 
-async function FTftitem(channel, message, username) {
+async function FTftitem(channel, message, username, NAME, ID, PUUID, REGION, ROUTING, LANG) {
   try {
     const data = await (await fetch(`https://raw.githubusercontent.com/ByDexterTR/RiotTwitchBot/main/tftitem_${LANG}.json`)).json();
     const fuse = new Fuse(data, { shouldSort: true, ignoreCase: true, keys: ['name'], });
@@ -166,7 +183,7 @@ async function FTftitem(channel, message, username) {
   }
 }
 
-async function FLolrank(channel, username) {
+async function FLolrank(channel, username, NAME, ID, PUUID, REGION, ROUTING, LANG) {
   try {
     const { data } = await axios.get(`https://${REGION}.api.riotgames.com/lol/league/v4/entries/by-summoner/${ID}?api_key=${APIKEY}`);
     if (ranked = data.find((entry) => entry.queueType === 'RANKED_SOLO_5x5')) {
@@ -182,7 +199,7 @@ async function FLolrank(channel, username) {
   }
 }
 
-async function FLollastmatch(channel, username) {
+async function FLollastmatch(channel, username, NAME, ID, PUUID, REGION, ROUTING, LANG) {
   try {
     const matchList = await axios.get(`https://${ROUTING}.api.riotgames.com/lol/match/v5/matches/by-puuid/${PUUID}/ids?api_key=${APIKEY}`);
     const matchDetails = await axios.get(`https://${ROUTING}.api.riotgames.com/lol/match/v5/matches/${matchList.data[0]}?api_key=${APIKEY}`);
@@ -194,7 +211,7 @@ async function FLollastmatch(channel, username) {
   }
 }
 
-async function FLolwinrate(channel, username) {
+async function FLolwinrate(channel, username, NAME, ID, PUUID, REGION, ROUTING, LANG) {
   try {
     const { data } = await axios.get(`https://${REGION}.api.riotgames.com/lol/league/v4/entries/by-summoner/${ID}?api_key=${APIKEY}`);
     if (ranked = data.find((entry) => entry.queueType === 'RANKED_SOLO_5x5')) {
@@ -210,7 +227,7 @@ async function FLolwinrate(channel, username) {
   }
 }
 
-async function Flolstreak(channel, username) {
+async function Flolstreak(channel, username, NAME, ID, PUUID, REGION, ROUTING, LANG) {
   try {
     const { data } = await axios.get(`https://${ROUTING}.api.riotgames.com/lol/match/v5/matches/by-puuid/${PUUID}/ids?start=0&count=100&api_key=${APIKEY}`);
     let consecutiveWins = 0;
@@ -229,7 +246,7 @@ async function Flolstreak(channel, username) {
   }
 }
 
-async function FLolmostplayed(channel, username) {
+async function FLolmostplayed(channel, username, NAME, ID, PUUID, REGION, ROUTING, LANG) {
   try {
     const { data: [{ championId, championPoints }] } = await axios.get(`https://${REGION}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-summoner/${ID}?api_key=${APIKEY}`);
     reply(username, channel, `${NAME} » ${await getChampionName(championId)} (${formatMasteryPoints(championPoints)})`);
@@ -239,7 +256,7 @@ async function FLolmostplayed(channel, username) {
   }
 }
 
-async function FLolrunes(channel, username) {
+async function FLolrunes(channel, username, NAME, ID, PUUID, REGION, ROUTING, LANG) {
   try {
     const { data } = await axios.get(`https://${REGION}.api.riotgames.com/lol/spectator/v4/active-games/by-summoner/${ID}?api_key=${APIKEY}`);
     const player = data.participants.find(player => player.summonerName === NAME);
@@ -262,7 +279,7 @@ async function FLolrunes(channel, username) {
   }
 }
 
-async function FLolmatchup(channel, username) {
+async function FLolmatchup(channel, username, NAME, ID, PUUID, REGION, ROUTING, LANG) {
   try {
     const { data } = await axios.get(`https://${REGION}.api.riotgames.com/lol/spectator/v4/active-games/by-summoner/${ID}?api_key=${APIKEY}`);
     const rankGroups = {};
@@ -279,7 +296,7 @@ async function FLolmatchup(channel, username) {
   }
 }
 
-async function FLolavg(channel, username) {
+async function FLolavg(channel, username, NAME, ID, PUUID, REGION, ROUTING, LANG) {
   try {
     const { data } = await axios.get(`https://${REGION}.api.riotgames.com/lol/spectator/v4/active-games/by-summoner/${ID}?api_key=${APIKEY}`);
     let totalRankValue = 0;
@@ -301,7 +318,7 @@ async function FLolavg(channel, username) {
   }
 }
 
-async function FLolmastery(channel, username) {
+async function FLolmastery(channel, username, NAME, ID, PUUID, REGION, ROUTING, LANG) {
   try {
     const { data } = await axios.get(`https://${REGION}.api.riotgames.com/lol/spectator/v4/active-games/by-summoner/${ID}?api_key=${APIKEY}`);
     const sortedParticipants = data.participants.sort((a, b) => a.teamId - b.teamId);
@@ -321,7 +338,7 @@ async function FLolmastery(channel, username) {
   }
 }
 
-async function FLollevels(channel, username) {
+async function FLollevels(channel, username, NAME, ID, PUUID, REGION, ROUTING, LANG) {
   try {
     const { data } = await axios.get(`https://${REGION}.api.riotgames.com/lol/spectator/v4/active-games/by-summoner/${ID}?api_key=${APIKEY}`);
     const sortedParticipants = data.participants.sort((a, b) => a.teamId - b.teamId);
@@ -345,28 +362,6 @@ async function FLollevels(channel, username) {
 
 const ranks = { 'UNRANKED': 0, 'IRON IV': 1, 'IRON III': 2, 'IRON II': 3, 'IRON I': 4, 'BRONZE IV': 5, 'BRONZE III': 6, 'BRONZE II': 7, 'BRONZE I': 8, 'SILVER IV': 9, 'SILVER III': 10, 'SILVER II': 11, 'SILVER I': 12, 'GOLD IV': 13, 'GOLD III': 14, 'GOLD II': 15, 'GOLD I': 16, 'PLATINUM IV': 17, 'PLATINUM III': 18, 'PLATINUM II': 19, 'PLATINUM I': 20, 'EMERALD IV': 21, 'EMERALD III': 22, 'EMERALD II': 23, 'EMERALD I': 24, 'DIAMOND IV': 25, 'DIAMOND III': 26, 'DIAMOND II': 27, 'DIAMOND I': 28, 'MASTER I': 29, 'GRANDMASTER I': 30, 'CHALLENGER I': 31 };
 
-async function Cache(username, channel) {
-  LANG = await config['lang'];
-  APIKEY = await config['riot']['apikey'];
-  REGION = await config['riot']['region'];
-  ROUTING = await config['riot']['routing'];
-  NAME = await config['riot']['summoner'];
-  try {
-    const response = await axios.get(`https://${REGION}.api.riotgames.com/lol/summoner/v4/summoners/by-name/${NAME}?api_key=${APIKEY}`);
-    NAME = response.data.name;
-    ID = response.data.id;
-    PUUID = response.data.puuid;
-    if (username !== undefined) reply(username, channel, config[LANG]['Cache_Main'].replace('{0}', NAME).replace('{1}', REGION).replace('{2}', config[LANG]['tag']));
-    else console.log(config[LANG]['Cache_Main'].replace('{0}', NAME).replace('{1}', REGION).replace('{2}', config[LANG]['tag']));
-  } catch (error) {
-    ID = undefined;
-    PUUID = undefined;
-    console.error('ERROR:', error.response ? error.response.data : error.message);
-    if (username !== undefined) reply(username, channel, config[LANG]['Cache_Error'].replace('{0}', NAME).replace('{1}', REGION));
-    else console.log(config[LANG]['Cache_Error2'].replace('{0}', NAME).replace('{1}', REGION));
-  }
-}
-
 async function getChampionName(championId) {
   try {
     const versionData = await (await fetch(`https://ddragon.leagueoflegends.com/api/versions.json`)).json();
@@ -377,13 +372,6 @@ async function getChampionName(championId) {
     console.error('ERROR:', error.response ? error.response.data : error.message);
     return config[LANG]['champion_error'];
   }
-}
-
-function SetDelay(command) {
-  boolen = true;
-  setTimeout(() => { boolen = false; }, 2000);
-  lastcommand = command;
-  setTimeout(() => { if (lastcommand === command) { lastcommand = '' }; }, 12000);
 }
 
 function formatMasteryPoints(points) {
