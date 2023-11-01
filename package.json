@@ -1,6 +1,6 @@
 {
   "name": "riottwitchbot",
-  "version": "1.4.7",
+  "version": "1.4.8",
   "description": "Developed specifically for viewers of Twitch streamers, it allows you to send your in-game stats quickly and easily in chat. | Twitch yayıncılarının izleyicileri için özel olarak geliştirilen bu özellik, oyun içi istatistiklerinizi sohbette hızlı ve kolay bir şekilde göndermenizi sağlar.",
   "main": "index.js",
   "scripts": {
