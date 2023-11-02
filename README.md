@@ -16,12 +16,13 @@ Developed specifically for viewers of Twitch streamers, it allows you to send yo
 |-|-|
 |!lolrank|Shows the Summoner's rank
 |!lollastmatch / !lollastgame|Shows the Summoner's last match statistics
-|!runes|Show the Summoner's runes (LIVE GAME)
-|!matchup|Shows the Summoners rank (LIVE GAME)
 |!winrate / !wr|Shows the Summoners Solo/Duo winrate
-|!avgrank / !elo|Shows the rank average of Summoners (LIVE GAME)
-|!mostplayed|Shows the Summoner's most played champion
 |!streak|Shows how many match the Summoner's is undefeated
+|!mostplayed / !main|Shows the Summoner's most played champion
+|!level|Shows the Summoner's level
+|!runes / !rune / !run|Show the Summoner's runes (LIVE GAME)
+|!matchup / !lolranks|Shows the Summoners rank (LIVE GAME)
+|!avgrank / !elo|Shows the rank average of Summoners (LIVE GAME)
 |!mastery|Shows the Summoners champion mastery (LIVE GAME)
 |!levels|Shows the Summoners level (LIVE GAME)
 
@@ -57,12 +58,13 @@ Twitch yayıncılarının izleyicileri için özel olarak geliştirildi, oyun i�
 |-|-|
 |!lolrank|Sihirdarın ligini gösterir
 |!lollastmatch / !lollastgame|Sihirdarın son maç istatistiğini gösterir
-|!runes|Sihirdarın rününü gösterir (LIVE GAME)
-|!matchup|Sihirdarların liglerini gösterir (LIVE GAME)
 |!winrate / !wr|Sihirdarın Tek/Çift kazanma oranını gösterir
-|!avgrank / !elo|Sihirdarların lig ortalamasını gösterir (LIVE GAME)
-|!mostplayed|Sihirdar'ın en fazla oynadığı şampiyonu gösterir
 |!streak|Sihirdarın kaç maçtır yenilmediğini gösterir
+|!mostplayed / !main|Sihirdarın en fazla oynadığı şampiyonu gösterir
+|!level|Sihirdarın seviyesini gösterir
+|!runes / !rune / !run|Sihirdarın rününü gösterir (LIVE GAME)
+|!matchup / !lolranks|Sihirdarların liglerini gösterir (LIVE GAME)
+|!avgrank / !elo|Sihirdarların lig ortalamasını gösterir (LIVE GAME)
 |!mastery|Sihirdarların şampiyon ustalığını gösterir (LIVE GAME)
 |!levels|Sihirdarların seviyesini gösterir (LIVE GAME)
 
@@ -81,4 +83,5 @@ Twitch yayıncılarının izleyicileri için özel olarak geliştirildi, oyun i�
 |!setregion tr1|Komutları yürütmek için bölge
 |!setlang en/tr|Botun dilini ayarlama
 
-[ByDexterTR](https://github.com/ByDexterTR) | [SemiH](https://github.com/hsemihaktas)
+> [ByDexterTR](https://github.com/ByDexterTR)
+> [SemiH](https://github.com/hsemihaktas)
