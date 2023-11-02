@@ -1,18 +1,26 @@
 {
   "apikey": "API KEY",
-  "#bydextertr": {
-    "lang": "tr",
-    "summoner": "ByDextér",
-    "region": "tr1",
-    "routing": "europe",
-    "lastcommand": " "
-  },
-  "#hsemik": {
-    "lang": "tr",
-    "summoner": "Rewound",
-    "region": "tr1",
-    "routing": "europe",
-    "lastcommand": " "
+  "twitch": {
+    "username": "LOGIN NAME",
+    "oauth": "OAUTH TOKEN",
+    "channels": [
+      "#bydextertr",
+      "#hsemik"
+    ],
+    "#bydextertr": {
+      "lang": "tr",
+      "summoner": "ByDextér",
+      "region": "tr1",
+      "routing": "europe",
+      "lastcommand": " "
+    },
+    "#hsemik": {
+      "lang": "tr",
+      "summoner": "Rewound",
+      "region": "tr1",
+      "routing": "europe",
+      "lastcommand": " "
+    }
   },
   "en": {
     "tag": "en_US",
