@@ -14,7 +14,7 @@ Developed specifically for viewers of Twitch streamers, it allows you to send yo
 ### LOL
 |Command|Description|
 |-|-|
-|!lolrank|Shows the Summoner's rank
+|!lolrank / !rank|Shows the Summoner's rank
 |!lollastmatch / !lollastgame|Shows the Summoner's last match statistics
 |!winrate / !wr|Shows the Summoners Solo/Duo winrate
 |!streak|Shows how many match the Summoner's is undefeated
@@ -56,7 +56,7 @@ Twitch yayıncılarının izleyicileri için özel olarak geliştirildi, oyun i�
 ### LOL
 |Komut|Açıklama|
 |-|-|
-|!lolrank|Sihirdarın ligini gösterir
+|!lolrank / !rank|Sihirdarın ligini gösterir
 |!lollastmatch / !lollastgame|Sihirdarın son maç istatistiğini gösterir
 |!winrate / !wr|Sihirdarın Tek/Çift kazanma oranını gösterir
 |!streak|Sihirdarın kaç maçtır yenilmediğini gösterir

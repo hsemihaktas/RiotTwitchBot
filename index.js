@@ -23,10 +23,7 @@ client.on('connected', (address, port) => {
 
 client.on('message', async (channel, userstate, message, self) => {
   if (self || !message.startsWith('!')) return;
-  const lastcommand = await config.twitch[channel].lastcommand;
-  const LANG = await config.twitch[channel].lang;
-  const REGION = await config.twitch[channel].region;
-  const ROUTING = await config.twitch[channel].routing;
+  const { routing: ROUTING, region: REGION, lang: LANG, lastcommand: lastcommand } = config.twitch[channel];
   let { summoner: NAME } = config.twitch[channel];
   let ID;
   let PUUID;
@@ -39,14 +36,13 @@ client.on('message', async (channel, userstate, message, self) => {
   }
   const spaceIndex = message.indexOf(' ');
   const command = spaceIndex !== -1 ? message.substring(0, spaceIndex) : message;
-  const value = spaceIndex !== -1 ? message.substring(spaceIndex + 1) : '';
   const commands = [
     { cmd: '!tftrank', key: 'tftrank', func: FTftrank, active: false },
     { cmd: '!tftlastmatch,!tftlastgame', key: 'tftlastmatch', func: FTftlastmatch, active: false },
     { cmd: '!tftavg', key: 'tftavg', func: FTftavg, active: false },
     { cmd: '!tftitem,!bis', key: 'tftitem', func: FTftitem, active: false },
 
-    { cmd: '!lolrank', key: 'lolrank', func: FLolrank, active: false },
+    { cmd: '!lolrank,!rank', key: 'lolrank', func: FLolrank, active: false },
     { cmd: '!lollastmatch,!lollastgame', key: 'lollastmatch', func: FLollastmatch, active: false },
     { cmd: '!winrate,!wr', key: 'winrate', func: FLolwinrate, active: false },
     { cmd: '!streak', key: 'streak', func: Flolstreak, active: false },
@@ -68,6 +64,7 @@ client.on('message', async (channel, userstate, message, self) => {
     if (lastcommand !== key && cmd.split(',').includes(command)) {
       if (active === undefined) {
         if (userstate.badges && (userstate.badges.moderator || userstate.badges.broadcaster)) {
+          const value = spaceIndex !== -1 ? message.substring(spaceIndex + 1) : '';
           if (key === 'setregion') {
             const data = ['na1', 'br1', 'la1', 'la2', 'jp1', 'kr', 'eun1', 'euw1', 'tr1', 'ru', 'oc1', 'ph2', 'sg2', 'th2', 'tw2', 'vn2'];
             const fuse = new Fuse(data, { shouldSort: true, ignoreCase: true, keys: ['name'] });
@@ -90,7 +87,7 @@ client.on('message', async (channel, userstate, message, self) => {
           try {
             const response = await axios.get(`https://${config.twitch[channel].region}.api.riotgames.com/lol/summoner/v4/summoners/by-name/${config.twitch[channel].summoner}?api_key=${APIKEY}`);
             config.twitch[channel].summoner = response.data.name;
-            reply(userstate.id, channel, config[LANG].Cache_Main.replace('{0}', response.data.name).replace('{1}', config.twitch[channel].region).replace('{2}', config[LANG].tag));
+            reply(userstate.id, channel, config[config.twitch[channel].lang].Cache_Main.replace('{0}', response.data.name).replace('{1}', config.twitch[channel].region).replace('{2}', config[config.twitch[channel].lang].tag));
             fs.writeFileSync('config.json', JSON.stringify(config, null, 2), 'utf8');
           } catch (error) {
             console.error('ERROR:', error.response ? error.response.data : error.message);
@@ -98,20 +95,15 @@ client.on('message', async (channel, userstate, message, self) => {
           }
         }
         else reply(userstate.id, channel, config[LANG].onlyadmin);
-      } else if (active === true) {
-        config.twitch[channel].lastcommand = key;
-        fs.writeFileSync('config.json', JSON.stringify(config, null, 2), 'utf8');
-        setTimeout(() => { if (config.twitch[channel].lastcommand === key) { config.twitch[channel].lastcommand = ' '; fs.writeFileSync('config.json', JSON.stringify(config, null, 2), 'utf8'); }; }, 12000);
-        if (NAME === undefined || ID === undefined || PUUID === undefined) { reply(userstate.id, channel, config[LANG].Cache_Error.replace('{0}', NAME).replace('{1}', REGION)); return; }
-        try { await axios.get(`https://${REGION}.api.riotgames.com/lol/spectator/v4/active-games/by-summoner/${ID}?api_key=${APIKEY}`); func(channel, userstate.id, NAME, ID, PUUID, REGION, ROUTING, LANG); } catch (error) { reply(userstate.id, channel, config[LANG].live_error) }
       } else {
         config.twitch[channel].lastcommand = key;
         fs.writeFileSync('config.json', JSON.stringify(config, null, 2), 'utf8');
         setTimeout(() => { if (config.twitch[channel].lastcommand === key) { config.twitch[channel].lastcommand = ' '; fs.writeFileSync('config.json', JSON.stringify(config, null, 2), 'utf8'); }; }, 12000);
         if (NAME === undefined || ID === undefined || PUUID === undefined) { reply(userstate.id, channel, config[LANG].Cache_Error.replace('{0}', NAME).replace('{1}', REGION)); return; }
-        if (key === 'commands') reply(userstate.id, channel, `LOL: !lolrank !lollastmatch !runes !matchup !wr !elo !mostplayed !streak !mastery !levels - TFT: !tftrank !tftlastmatch !tftavg !tftitem CHAMP - MOD: !setlang !setregion !setsummoner`);
-        else if (key === 'tftitem' && value !== undefined) func(channel, value, userstate.id, NAME, ID, PUUID, REGION, ROUTING, LANG);
-        else func(channel, userstate.id, NAME, ID, PUUID, REGION, ROUTING, LANG);
+        if (key === 'tftitem') { const value = spaceIndex !== -1 ? message.substring(spaceIndex + 1) : ''; func(channel, value, userstate.id, NAME, ID, PUUID, REGION, ROUTING, LANG); return; }
+        if (key === 'commands') { reply(userstate.id, channel, config[LANG].commands); return; }
+        if (active === true) try { await axios.get(`https://${REGION}.api.riotgames.com/lol/spectator/v4/active-games/by-summoner/${ID}?api_key=${APIKEY}`); } catch (error) { reply(userstate.id, channel, config[LANG].live_error); return; }
+        func(channel, userstate.id, NAME, ID, PUUID, REGION, ROUTING, LANG);
       }
     }
   });
@@ -122,13 +114,8 @@ client.on('message', async (channel, userstate, message, self) => {
 async function FTftrank(channel, username, NAME, ID, _PUUID, REGION, _ROUTING, LANG) {
   try {
     const { data } = await axios.get(`https://${REGION}.api.riotgames.com/tft/league/v1/entries/by-summoner/${ID}?api_key=${APIKEY}`);
-    if (ranked = data.find((entry) => entry.queueType === 'RANKED_TFT')) {
-      const { tier, rank, leaguePoints } = ranked;
-      const tr = `${tier} ${rank}`;
-      reply(username, channel, `${NAME} » ${config[LANG][tr]} (${leaguePoints} LP)`);
-    } else {
-      reply(username, channel, `${NAME} » ${config[LANG].UNRANKED}`);
-    }
+    const ranked = data.find((entry) => entry.queueType === 'RANKED_TFT');
+    reply(username, channel, ranked ? config[LANG].FTftrank_Main.replace('{0}', NAME).replace('{1}', config[LANG][`${ranked.tier} ${ranked.rank}`]).replace('{2}', ranked.leaguePoints) : config[LANG].FTftrank_Error.replace('{0}', NAME).replace('{1}', config[LANG].UNRANKED));
   } catch (error) {
     reply(username, channel, config[LANG].rank_error);
     console.error('ERROR:', error.response ? error.response.data : error.message);
@@ -178,13 +165,8 @@ async function FTftitem(channel, message, username, _NAME, _ID, _PUUID, _REGION,
 async function FLolrank(channel, username, NAME, ID, _PUUID, REGION, _ROUTING, LANG) {
   try {
     const { data } = await axios.get(`https://${REGION}.api.riotgames.com/lol/league/v4/entries/by-summoner/${ID}?api_key=${APIKEY}`);
-    if (ranked = data.find((entry) => entry.queueType === 'RANKED_SOLO_5x5')) {
-      const { tier, rank, leaguePoints } = ranked;
-      const tr = `${tier} ${rank}`;
-      reply(username, channel, `${NAME} » ${config[LANG][tr]} (${leaguePoints} LP)`);
-    } else {
-      reply(username, channel, `${NAME} » ${config[LANG].UNRANKED}`);
-    }
+    const ranked = data.find((entry) => entry.queueType === 'RANKED_SOLO_5x5');
+    reply(username, channel, ranked ? config[LANG].FLolrank_Main.replace('{0}', NAME).replace('{1}', config[LANG][`${ranked.tier} ${ranked.rank}`]).replace('{2}', ranked.leaguePoints) : config[LANG].FLolrank_Error.replace('{0}', NAME).replace('{1}', config[LANG].UNRANKED));
   } catch (error) {
     reply(username, channel, config[LANG].rank_error);
     console.error('ERROR:', error.response ? error.response.data : error.message);
@@ -206,13 +188,8 @@ async function FLollastmatch(channel, username, NAME, _ID, PUUID, _REGION, ROUTI
 async function FLolwinrate(channel, username, NAME, ID, _PUUID, REGION, _ROUTING, LANG) {
   try {
     const { data } = await axios.get(`https://${REGION}.api.riotgames.com/lol/league/v4/entries/by-summoner/${ID}?api_key=${APIKEY}`);
-    if (ranked = data.find((entry) => entry.queueType === 'RANKED_SOLO_5x5')) {
-      const { wins, losses } = ranked;
-      const winRate = (wins / (wins + losses)) * 100;
-      reply(username, channel, config[LANG].FLolwinrate_Main.replace('{0}', NAME).replace('{1}', wins).replace('{2}', losses).replace('{3}', winRate.toFixed(2)));
-    } else {
-      reply(username, channel, config[LANG].FLolwinrate_Error.replace('{0}', NAME).replace('{1}', config[LANG]['match_error']));
-    }
+    const ranked = data.find((entry) => entry.queueType === 'RANKED_SOLO_5x5')
+    reply(username, channel, ranked ? config[LANG].FLolwinrate_Main.replace('{0}', NAME).replace('{1}', ranked.wins).replace('{2}', ranked.losses).replace('{3}', Math.floor(((ranked.wins / (ranked.wins + ranked.losses)) * 100) * 100) / 100) : config[LANG].FLolwinrate_Error.replace('{0}', NAME).replace('{1}', config[LANG].match_error));
   } catch (error) {
     reply(username, channel, config[LANG].match_error);
     console.error('ERROR:', error.response ? error.response.data : error.message);
@@ -231,7 +208,7 @@ async function Flolstreak(channel, username, NAME, _ID, PUUID, _REGION, ROUTING,
         break;
       }
     }
-    reply(username, channel, consecutiveWins === 0 ? config[LANG].Flolstreak_Error.replace('{0}', NAME) : config[LANG]['Flolstreak_Main'].replace('{0}', NAME).replace('{1}', consecutiveWins));
+    reply(username, channel, consecutiveWins === 0 ? config[LANG].Flolstreak_Error.replace('{0}', NAME) : config[LANG].Flolstreak_Main.replace('{0}', NAME).replace('{1}', consecutiveWins));
   } catch (error) {
     reply(username, channel, config[LANG].match_error);
     console.error('ERROR:', error.response ? error.response.data : error.message);
@@ -241,7 +218,7 @@ async function Flolstreak(channel, username, NAME, _ID, PUUID, _REGION, ROUTING,
 async function FLolmostplayed(channel, username, NAME, ID, _PUUID, REGION, _ROUTING, LANG) {
   try {
     const { data: [{ championId, championPoints }] } = await axios.get(`https://${REGION}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-summoner/${ID}?api_key=${APIKEY}`);
-    reply(username, channel, `${NAME} » ${await getChampionName(championId, LANG)} (${formatMasteryPoints(championPoints)})`);
+    reply(username, channel, config[LANG].FLolmostplayed_Main.replace('{0}', NAME).replace('{1}', await getChampionName(championId, LANG)).replace('{2}', formatMasteryPoints(championPoints)));
   } catch (error) {
     reply(username, channel, config[LANG].champion_error);
     console.error('ERROR:', error.response ? error.response.data : error.message);
@@ -251,9 +228,9 @@ async function FLolmostplayed(channel, username, NAME, ID, _PUUID, REGION, _ROUT
 async function FLollevel(channel, username, NAME, _ID, _PUUID, REGION, _ROUTING, LANG) {
   try {
     const { data: levelData } = await axios.get(`https://${REGION}.api.riotgames.com/lol/summoner/v4/summoners/by-name/${NAME}?api_key=${APIKEY}`);
-    reply(username, channel, `${NAME} » ${levelData.summonerLevel}Lv`);
+    reply(username, channel, config[LANG].FLollevel_Main.replace('{0}', NAME).replace('{1}', levelData.summonerLevel));
   } catch (error) {
-    reply(username, channel, config[LANG].match_error);
+    reply(username, channel, config[LANG].summoner_error);
     console.error('ERROR:', error.response ? error.response.data : error.message);
   }
 }
@@ -274,7 +251,7 @@ async function FLolrunes(channel, username, NAME, ID, _PUUID, REGION, _ROUTING, 
       }
       return config[LANG].FLolrunes_Rune;
     });
-    reply(username, channel, `${await getChampionName(player.championId, LANG)} » ${perkNames.slice(0, 4).join(', ')} - ${perkNames.slice(4).join(', ')}`);
+    reply(username, channel, config[LANG].FLolrunes_Main.replace('{0}', await getChampionName(player.championId, LANG)).replace('{1}', perkNames.slice(0, 4).join(', ')).replace('{2}', perkNames.slice(4).join(', ')));
   } catch (error) {
     reply(username, channel, config[LANG].FLolrunes_Error);
     console.error('ERROR:', error.response ? error.response.data : error.message);
