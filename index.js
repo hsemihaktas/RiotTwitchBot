@@ -67,7 +67,7 @@ client.on('message', async (channel, userstate, message, self) => {
           const value = spaceIndex !== -1 ? message.substring(spaceIndex + 1) : '';
           if (key === 'setregion') {
             const data = ['na1', 'br1', 'la1', 'la2', 'jp1', 'kr', 'eun1', 'euw1', 'tr1', 'ru', 'oc1', 'ph2', 'sg2', 'th2', 'tw2', 'vn2'];
-            const fuse = new Fuse(data, { shouldSort: true, ignoreCase: true, keys: ['name'] });
+            const fuse = new Fuse(data, { keys: ['name'] });
             const results = fuse.search(value);
             const region = results.length > 0 ? results[0].item : 'euw1';
             config.twitch[channel].region = region;
@@ -77,7 +77,7 @@ client.on('message', async (channel, userstate, message, self) => {
             else if (region === 'oc1' || region === 'ph2' || region === 'sg2' || region === 'th2' || region === 'tw2' || region === 'vn2') config.twitch[channel].routing = 'sea';
           } else if (key === 'setlang') {
             const data = ['tr', 'en'];
-            const fuse = new Fuse(data, { shouldSort: true, ignoreCase: true, keys: ['name'] });
+            const fuse = new Fuse(data, { keys: ['name'] });
             const results = fuse.search(value);
             const language = results.length > 0 ? results[0].item : 'en';
             config.twitch[channel].lang = language;
@@ -91,7 +91,7 @@ client.on('message', async (channel, userstate, message, self) => {
             fs.writeFileSync('config.json', JSON.stringify(config, null, 2), 'utf8');
           } catch (error) {
             console.error('ERROR:', error.response ? error.response.data : error.message);
-            reply(userstate.id, channel, config[LANG].Cache_Error.replace('{0}', NAME).replace('{1}', REGION));
+            reply(userstate.id, channel, config[LANG].Cache_Error.replace('{0}', config.twitch[channel].summoner).replace('{1}', config.twitch[channel].region));
           }
         }
         else reply(userstate.id, channel, config[LANG].onlyadmin);
@@ -113,20 +113,18 @@ client.on('message', async (channel, userstate, message, self) => {
 
 async function FTftrank(channel, username, NAME, ID, _PUUID, REGION, _ROUTING, LANG) {
   try {
-    const { data } = await axios.get(`https://${REGION}.api.riotgames.com/tft/league/v1/entries/by-summoner/${ID}?api_key=${APIKEY}`);
-    const ranked = data.find((entry) => entry.queueType === 'RANKED_TFT');
-    reply(username, channel, ranked ? config[LANG].FTftrank_Main.replace('{0}', NAME).replace('{1}', config[LANG][`${ranked.tier} ${ranked.rank}`]).replace('{2}', ranked.leaguePoints) : config[LANG].FTftrank_Error.replace('{0}', NAME).replace('{1}', config[LANG].UNRANKED));
+    const info = (await axios.get(`https://${REGION}.api.riotgames.com/tft/league/v1/entries/by-summoner/${ID}?api_key=${APIKEY}`)).data.find(entry => entry.queueType === 'RANKED_TFT');
+    reply(username, channel, info ? config[LANG].FTftrank_Main.replace('{0}', NAME).replace('{1}', config[LANG][`${info.tier} ${info.rank}`]).replace('{2}', info.leaguePoints) : config[LANG].FTftrank_Error.replace('{0}', NAME).replace('{1}', config[LANG].UNRANKED));
   } catch (error) {
     reply(username, channel, config[LANG].rank_error);
     console.error('ERROR:', error.response ? error.response.data : error.message);
   }
 }
 
-async function FTftlastmatch(channel, username, NAME, _ID, PUUID, _REGION, ROUTING) {
+async function FTftlastmatch(channel, username, NAME, _ID, PUUID, _REGION, ROUTING, LANG) {
   try {
-    const matchList = await axios.get(`https://${ROUTING}.api.riotgames.com/tft/match/v1/matches/by-puuid/${PUUID}/ids?count=1&api_key=${APIKEY}`);
-    const matchDetails = await axios.get(`https://${ROUTING}.api.riotgames.com/tft/match/v1/matches/${matchList.data[0]}?api_key=${APIKEY}`);
-    const myParticipant = matchDetails.data.info.participants.find(participant => participant.puuid === PUUID);
+    const matchDetails = (await axios.get(`https://${ROUTING}.api.riotgames.com/tft/match/v1/matches/by-puuid/${PUUID}/ids?count=1&api_key=${APIKEY}`)).data[0];
+    const myParticipant = (await axios.get(`https://${ROUTING}.api.riotgames.com/tft/match/v1/matches/${matchDetails}?api_key=${APIKEY}`)).data.info.participants.find(participant => participant.puuid === PUUID);
     reply(username, channel, config[LANG].FTftlastmatch_Main.replace('{0}', NAME).replace('{1}', myParticipant.placement).replace('{2}', myParticipant.level));
   } catch (error) {
     reply(username, channel, config[LANG].match_error);
@@ -136,13 +134,13 @@ async function FTftlastmatch(channel, username, NAME, _ID, PUUID, _REGION, ROUTI
 
 async function FTftavg(channel, username, NAME, _ID, PUUID, _REGION, ROUTING, LANG) {
   try {
-    const { data } = await axios.get(`https://${ROUTING}.api.riotgames.com/tft/match/v1/matches/by-puuid/${PUUID}/ids?api_key=${APIKEY}`);
+    const { data: matchIds } = await axios.get(`https://${ROUTING}.api.riotgames.com/tft/match/v1/matches/by-puuid/${PUUID}/ids?api_key=${APIKEY}`);
     let totalPlacement = 0;
-    for (const matchId of data) {
-      const matchDetails = await axios.get(`https://${ROUTING}.api.riotgames.com/tft/match/v1/matches/${matchId}?api_key=${APIKEY}`);
-      totalPlacement += matchDetails.data.info.participants.find(participant => participant.puuid === PUUID)?.placement;
+    for (const matchId of matchIds) {
+      const { data: matchDetails } = await axios.get(`https://${ROUTING}.api.riotgames.com/tft/match/v1/matches/${matchId}?api_key=${APIKEY}`);
+      totalPlacement += matchDetails.info.participants.find(participant => participant.puuid === PUUID)?.placement;
     }
-    reply(username, channel, config[LANG].FTftavg_Main.replace('{0}', NAME).replace('{1}', data.length).replace('{2}', Math.floor(totalPlacement / data.length * 10) / 10));
+    reply(username, channel, config[LANG].FTftavg_Main.replace('{0}', NAME).replace('{1}', matchIds.length).replace('{2}', Math.floor(totalPlacement / matchIds.length * 10) / 10));
   } catch (error) {
     reply(username, channel, config[LANG].match_error);
     console.error('ERROR:', error.response ? error.response.data : error.message);
@@ -152,9 +150,8 @@ async function FTftavg(channel, username, NAME, _ID, PUUID, _REGION, ROUTING, LA
 async function FTftitem(channel, message, username, _NAME, _ID, _PUUID, _REGION, _ROUTING, LANG) {
   try {
     const data = await (await fetch(`https://raw.githubusercontent.com/ByDexterTR/RiotTwitchBot/main/tftitem_${LANG}.json`)).json();
-    const fuse = new Fuse(data, { shouldSort: true, ignoreCase: true, keys: ['name'] });
-    const results = fuse.search(message);
-    const character = results.length > 0 ? results[0].item : undefined;
+    const fuse = new Fuse(data, { keys: ['name'] });
+    const character = (fuse.search(message)[0] || {}).item;
     reply(username, channel, character ? config[LANG].FTftitem_Main.replace('{0}', character.name).replace('{1}', character.items.join(', ')) : config[LANG]['champion_error']);
   } catch (error) {
     reply(username, channel, config[LANG].FTftitem_Error);
@@ -164,9 +161,8 @@ async function FTftitem(channel, message, username, _NAME, _ID, _PUUID, _REGION,
 
 async function FLolrank(channel, username, NAME, ID, _PUUID, REGION, _ROUTING, LANG) {
   try {
-    const { data } = await axios.get(`https://${REGION}.api.riotgames.com/lol/league/v4/entries/by-summoner/${ID}?api_key=${APIKEY}`);
-    const ranked = data.find((entry) => entry.queueType === 'RANKED_SOLO_5x5');
-    reply(username, channel, ranked ? config[LANG].FLolrank_Main.replace('{0}', NAME).replace('{1}', config[LANG][`${ranked.tier} ${ranked.rank}`]).replace('{2}', ranked.leaguePoints) : config[LANG].FLolrank_Error.replace('{0}', NAME).replace('{1}', config[LANG].UNRANKED));
+    const info = (await axios.get(`https://${REGION}.api.riotgames.com/lol/league/v4/entries/by-summoner/${ID}?api_key=${APIKEY}`)).data.find(entry => entry.queueType === 'RANKED_SOLO_5x5');
+    reply(username, channel, info ? config[LANG].FLolrank_Main.replace('{0}', NAME).replace('{1}', config[LANG][`${info.tier} ${info.rank}`]).replace('{2}', info.leaguePoints) : config[LANG].FLolrank_Error.replace('{0}', NAME).replace('{1}', config[LANG].UNRANKED));
   } catch (error) {
     reply(username, channel, config[LANG].rank_error);
     console.error('ERROR:', error.response ? error.response.data : error.message);
@@ -175,10 +171,9 @@ async function FLolrank(channel, username, NAME, ID, _PUUID, REGION, _ROUTING, L
 
 async function FLollastmatch(channel, username, NAME, _ID, PUUID, _REGION, ROUTING, LANG) {
   try {
-    const matchList = await axios.get(`https://${ROUTING}.api.riotgames.com/lol/match/v5/matches/by-puuid/${PUUID}/ids?api_key=${APIKEY}`);
-    const matchDetails = await axios.get(`https://${ROUTING}.api.riotgames.com/lol/match/v5/matches/${matchList.data[0]}?api_key=${APIKEY}`);
-    const myParticipant = matchDetails.data.info.participants.find(participant => participant.puuid === PUUID);
-    reply(username, channel, config[LANG].FLollastmatch_Main.replace('{0}', NAME).replace('{1}', myParticipant.championName).replace('{2}', Math.floor(((myParticipant.kills + myParticipant.assists) / myParticipant.deaths) * 10) / 10).replace('{3}', config[LANG][myParticipant.individualPosition]).replace('{4}', config[LANG][myParticipant.win ? 'WIN' : 'LOSE']))
+    const matchDetails = (await axios.get(`https://${ROUTING}.api.riotgames.com/lol/match/v5/matches/by-puuid/${PUUID}/ids?api_key=${APIKEY}`)).data[0];
+    const myParticipant = (await axios.get(`https://${ROUTING}.api.riotgames.com/lol/match/v5/matches/${matchDetails}?api_key=${APIKEY}`)).data.info.participants.find(participant => participant.puuid === PUUID);
+    reply(username, channel, config[LANG].FLollastmatch_Main.replace('{0}', NAME).replace('{1}', myParticipant.championName).replace('{2}', myParticipant.deaths === 0 ? myParticipant.kills + myParticipant.assists : Math.floor(((myParticipant.kills + myParticipant.assists) / myParticipant.deaths) * 10) / 10).replace('{3}', config[LANG][myParticipant.individualPosition]).replace('{4}', config[LANG][myParticipant.win ? 'WIN' : 'LOSE']))
   } catch (error) {
     reply(username, channel, config[LANG].match_error);
     console.error('ERROR:', error.response ? error.response.data : error.message);
@@ -187,9 +182,8 @@ async function FLollastmatch(channel, username, NAME, _ID, PUUID, _REGION, ROUTI
 
 async function FLolwinrate(channel, username, NAME, ID, _PUUID, REGION, _ROUTING, LANG) {
   try {
-    const { data } = await axios.get(`https://${REGION}.api.riotgames.com/lol/league/v4/entries/by-summoner/${ID}?api_key=${APIKEY}`);
-    const ranked = data.find((entry) => entry.queueType === 'RANKED_SOLO_5x5')
-    reply(username, channel, ranked ? config[LANG].FLolwinrate_Main.replace('{0}', NAME).replace('{1}', ranked.wins).replace('{2}', ranked.losses).replace('{3}', Math.floor(((ranked.wins / (ranked.wins + ranked.losses)) * 100) * 100) / 100) : config[LANG].FLolwinrate_Error.replace('{0}', NAME).replace('{1}', config[LANG].match_error));
+    const info = (await axios.get(`https://${REGION}.api.riotgames.com/lol/league/v4/entries/by-summoner/${ID}?api_key=${APIKEY}`)).data.find(entry => entry.queueType === 'RANKED_SOLO_5x5');
+    reply(username, channel, info ? config[LANG].FLolwinrate_Main.replace('{0}', NAME).replace('{1}', info.wins).replace('{2}', info.losses).replace('{3}', Math.floor(((info.wins / (info.wins + info.losses)) * 100) * 100) / 100) : config[LANG].FLolwinrate_Error.replace('{0}', NAME).replace('{1}', config[LANG].match_error));
   } catch (error) {
     reply(username, channel, config[LANG].match_error);
     console.error('ERROR:', error.response ? error.response.data : error.message);
@@ -202,11 +196,8 @@ async function Flolstreak(channel, username, NAME, _ID, PUUID, _REGION, ROUTING,
     let consecutiveWins = 0;
     for (const matchId of data) {
       const match = (await axios.get(`https://${ROUTING}.api.riotgames.com/lol/match/v5/matches/${matchId}?api_key=${APIKEY}`)).data;
-      if (match.info.participants.find(p => p.puuid === PUUID)?.win) {
-        consecutiveWins++;
-      } else {
-        break;
-      }
+      if (!match.info.participants.find(p => p.puuid === PUUID)?.win) break;
+      consecutiveWins++;
     }
     reply(username, channel, consecutiveWins === 0 ? config[LANG].Flolstreak_Error.replace('{0}', NAME) : config[LANG].Flolstreak_Main.replace('{0}', NAME).replace('{1}', consecutiveWins));
   } catch (error) {
@@ -263,10 +254,9 @@ async function FLolmatchup(channel, username, _NAME, ID, _PUUID, REGION, _ROUTIN
     const { data } = await axios.get(`https://${REGION}.api.riotgames.com/lol/spectator/v4/active-games/by-summoner/${ID}?api_key=${APIKEY}`);
     const rankGroups = {};
     for (const participant of data.participants) {
-      const leagueInfo = (await axios.get(`https://${REGION}.api.riotgames.com/lol/league/v4/entries/by-summoner/${participant.summonerId}?api_key=${APIKEY}`)).data.find(entry => entry.queueType === 'RANKED_SOLO_5x5');
-      const groupKey = leagueInfo ? `${leagueInfo.tier} ${leagueInfo.rank}` : 'UNRANKED';
-      rankGroups[groupKey] = rankGroups[groupKey] || [];
-      rankGroups[groupKey].push(await getChampionName(participant.championId, LANG));
+      const info = (await axios.get(`https://${REGION}.api.riotgames.com/lol/league/v4/entries/by-summoner/${participant.summonerId}?api_key=${APIKEY}`)).data.find(entry => entry.queueType === 'RANKED_SOLO_5x5');
+      const groupKey = info ? `${info.tier} ${info.rank}` : 'UNRANKED';
+      rankGroups[groupKey] = (rankGroups[groupKey] || []).concat(await getChampionName(participant.championId, LANG));
     }
     reply(username, channel, Object.entries(rankGroups).sort((a, b) => ranks[a[0]] - ranks[b[0]]).map(([groupKey, champions]) => `${config[LANG][groupKey]} (${champions.join(', ')})`).join(' - '));
   } catch (error) {
@@ -278,15 +268,11 @@ async function FLolmatchup(channel, username, _NAME, ID, _PUUID, REGION, _ROUTIN
 async function FLolavg(channel, username, _NAME, ID, _PUUID, REGION, _ROUTING, LANG) {
   try {
     const { data } = await axios.get(`https://${REGION}.api.riotgames.com/lol/spectator/v4/active-games/by-summoner/${ID}?api_key=${APIKEY}`);
-    let totalRankValue = 0;
-    let totalPlayers = 0;
+    let totalRankValue = 0, totalPlayers = 0;
     for (const participant of data.participants) {
-      const { data: leagueData } = await axios.get(`https://${REGION}.api.riotgames.com/lol/league/v4/entries/by-summoner/${participant.summonerId}?api_key=${APIKEY}`);
-      const leagueInfo = leagueData.find((entry) => entry.queueType === 'RANKED_SOLO_5x5');
-      if (leagueInfo) {
-        const { tier, rank } = leagueInfo;
-        const rankValue = ranks[`${tier} ${rank}`] || 0;
-        totalRankValue += rankValue;
+      const info = (await axios.get(`https://${REGION}.api.riotgames.com/lol/league/v4/entries/by-summoner/${participant.summonerId}?api_key=${APIKEY}`)).data.find(entry => entry.queueType === 'RANKED_SOLO_5x5');
+      if (info) {
+        totalRankValue += ranks[`${info.tier} ${info.rank}`] || 0;
         totalPlayers++;
       }
     }
