@@ -94,7 +94,7 @@ client.on('message', async (channel, userstate, message, self) => {
           fs.writeFileSync('config.json', JSON.stringify(config, null, 2), 'utf8');
           reply(userstate.id, channel, config[config.twitch[channel].lang].main_cache.replace('{0}', info.gameName).replace('{1}', info.tagLine).replace('{2}', config.twitch[channel].region).replace('{3}', config[config.twitch[channel].lang].tag));
         } catch (error) {
-          reply(userstate.id, channel, config[config.twitch[channel].lang].error_cache.replace('{0}', info.gameName).replace('{1}', info.tagLine).replace('{2}', config.twitch[channel].region));
+          reply(userstate.id, channel, config[config.twitch[channel].lang].error_cache.replace('{0}', config.twitch[channel].name).replace('{1}', config.twitch[channel].tagline).replace('{2}', config.twitch[channel].region));
           console.error('ERROR:', error.response ? error.response.data : error.message);
         }
       }
