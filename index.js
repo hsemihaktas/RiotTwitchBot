@@ -100,7 +100,7 @@ client.on('message', async (channel, userstate, message, self) => {
       }
       else reply(userstate.id, channel, config[config.twitch[channel].lang].admin_error);
     }
-    if (active === true) { try { await axios.get(`https://${REGION}.api.riotgames.com/lol/spectator/v4/active-games/by-summoner/${ID}?api_key=${APIKEY}`); } catch (error) { reply(userstate.id, channel, config[LANG].error_live.replace('{0}', NAME).replace('{1}', TAGLINE)); return; } }
+    if (active === true) { try { await axios.get(`https://${REGION}.api.riotgames.com/lol/spectator/v5/active-games/by-summoner/${PUUID}?api_key=${APIKEY}`); } catch (error) { reply(userstate.id, channel, config[LANG].error_live.replace('{0}', NAME).replace('{1}', TAGLINE)); return; } }
     try {
       if (key === 'rank') {
         const info = (await axios.get(`https://${REGION}.api.riotgames.com/lol/league/v4/entries/by-summoner/${ID}?api_key=${APIKEY}`)).data.find(entry => entry.queueType === 'RANKED_SOLO_5x5');
@@ -122,13 +122,13 @@ client.on('message', async (channel, userstate, message, self) => {
         }
         reply(userstate.id, channel, consecutiveWins === 0 ? config[LANG].error_streak.replace('{0}', NAME).replace('{1}', TAGLINE) : config[LANG].command_streak.replace('{0}', NAME).replace('{1}', TAGLINE).replace('{2}', consecutiveWins));
       } else if (key === 'main') {
-        const { championId, championPoints } = (await axios.get(`https://${REGION}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-summoner/${ID}?api_key=${APIKEY}`)).data[0];
+        const { championId, championPoints } = (await axios.get(`https://${REGION}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/${PUUID}?api_key=${APIKEY}`)).data[0];
         reply(userstate.id, channel, config[LANG].command_main.replace('{0}', NAME).replace('{1}', TAGLINE).replace('{2}', await getChampionName(championId, LANG)).replace('{3}', formatMasteryPoints(championPoints)));
       } else if (key === 'lv') {
         const levelData = (await axios.get(`https://${REGION}.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/${PUUID}?api_key=${APIKEY}`)).data;
         reply(userstate.id, channel, config[LANG].command_lv.replace('{0}', NAME).replace('{1}', TAGLINE).replace('{2}', levelData.summonerLevel));
       } else if (key === 'run') {
-        const { data } = await axios.get(`https://${REGION}.api.riotgames.com/lol/spectator/v4/active-games/by-summoner/${ID}?api_key=${APIKEY}`);
+        const { data } = await axios.get(`https://${REGION}.api.riotgames.com/lol/spectator/v5/active-games/by-summoner/${PUUID}?api_key=${APIKEY}`);
         const player = data.participants.find(player => player.summonerId === ID);
         const perkIds = player.perks.perkIds.slice(0, 6);
         const versionData = await (await fetch(`https://ddragon.leagueoflegends.com/api/versions.json`)).json();
@@ -144,7 +144,7 @@ client.on('message', async (channel, userstate, message, self) => {
         });
         reply(userstate.id, channel, config[LANG].command_run.replace('{0}', await getChampionName(player.championId, LANG)).replace('{1}', perkNames.slice(0, 4).join(', ')).replace('{2}', perkNames.slice(4).join(', ')));
       } else if (key === 'matchup') {
-        const { data } = await axios.get(`https://${REGION}.api.riotgames.com/lol/spectator/v4/active-games/by-summoner/${ID}?api_key=${APIKEY}`);
+        const { data } = await axios.get(`https://${REGION}.api.riotgames.com/lol/spectator/v5/active-games/by-summoner/${PUUID}?api_key=${APIKEY}`);
         const rankGroups = {};
         for (const participant of data.participants) {
           const info = (await axios.get(`https://${REGION}.api.riotgames.com/lol/league/v4/entries/by-summoner/${participant.summonerId}?api_key=${APIKEY}`)).data.find(entry => entry.queueType === 'RANKED_SOLO_5x5');
@@ -153,7 +153,7 @@ client.on('message', async (channel, userstate, message, self) => {
         }
         reply(userstate.id, channel, Object.entries(rankGroups).sort((a, b) => config.ranks[a[0]] - config.ranks[b[0]]).map(([groupKey, champions]) => `${config[LANG][groupKey]} (${champions.join(', ')})`).join(' - '));
       } else if (key === 'elo') {
-        const { data } = await axios.get(`https://${REGION}.api.riotgames.com/lol/spectator/v4/active-games/by-summoner/${ID}?api_key=${APIKEY}`);
+        const { data } = await axios.get(`https://${REGION}.api.riotgames.com/lol/spectator/v5/active-games/by-summoner/${PUUID}?api_key=${APIKEY}`);
         let totalRankValue = 0, totalPlayers = 0;
         for (const participant of data.participants) {
           const info = (await axios.get(`https://${REGION}.api.riotgames.com/lol/league/v4/entries/by-summoner/${participant.summonerId}?api_key=${APIKEY}`)).data.find(entry => entry.queueType === 'RANKED_SOLO_5x5');
@@ -161,11 +161,11 @@ client.on('message', async (channel, userstate, message, self) => {
         }
         reply(userstate.id, channel, config[LANG].command_elo.replace('{0}', config[LANG][`${Object.keys(config.ranks).find(rank => config.ranks[rank] === Math.round(totalRankValue / totalPlayers))}`]));
       } else if (key === 'mastery' || key === 'levels') {
-        const { data } = await axios.get(`https://${REGION}.api.riotgames.com/lol/spectator/v4/active-games/by-summoner/${ID}?api_key=${APIKEY}`);
+        const { data } = await axios.get(`https://${REGION}.api.riotgames.com/lol/spectator/v5/active-games/by-summoner/${PUUID}?api_key=${APIKEY}`);
         const sortedParticipants = data.participants.sort((a, b) => a.teamId - b.teamId);
         const teamMessages = {};
         for (const participant of sortedParticipants) {
-          const { data } = key === 'mastery' ? await axios.get(`https://${REGION}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-summoner/${participant.summonerId}/by-champion/${participant.championId}?api_key=${APIKEY}`) : await axios.get(`https://${REGION}.api.riotgames.com/lol/summoner/v4/summoners/by-name/${participant.summonerName}?api_key=${APIKEY}`);
+          const { data } = key === 'mastery' ? await axios.get(`https://${REGION}.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/${participant.puuid}/by-champion/${participant.championId}?api_key=${APIKEY}`) : await axios.get(`https://${REGION}.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/${participant.puuid}?api_key=${APIKEY}`);
           teamMessages[participant.teamId] = teamMessages[participant.teamId] || [];
           teamMessages[participant.teamId].push(key === 'mastery' ? `${await getChampionName(participant.championId, LANG)} ${data.championPoints ? formatMasteryPoints(data.championPoints) : 0}` : `${await getChampionName(participant.championId, LANG)} ${data.summonerLevel}Lv`);
         }
