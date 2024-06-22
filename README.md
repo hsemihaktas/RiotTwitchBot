@@ -7,9 +7,10 @@
 |!setregion / !setreg euw1|Region for executing commands|Moderator & Streamer
 |!setlanguage / !setlang en|Setting the language of the Bot|Moderator & Streamer
 |!commands/!help|Shows the command list|General
-|!lolrank / !rank|Shows the Summoner's rank|General
+|!lolrank / !rank|Shows the Summoner's rank(Solo/Duo)|General
+|!lolflex / !flex|Shows the Summoner's rank(Flex)|General
 |!lollastgame / !lastgame / !lg|Shows the Summoner's last match statistics|General
-|!winrate / !wr|Shows the Summoner's Solo/Duo winrate|General
+|!winrate / !wr|Shows the Summoner's Solo/Duo & Flex winrate|General
 |!streak|Shows how many match the Summoner's is undefeated|General
 |!mostplayed / !main|Shows the Summoner's most played champion|General
 |!level / !lv|Shows the Summoner's level|General
